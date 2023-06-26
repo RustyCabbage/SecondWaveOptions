@@ -81,13 +81,6 @@ fabric.properties
 # Sonarlint plugin
 .idea/sonarlint
 
-### Java ###
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
 # BlueJ files
 *.ctxt
 
@@ -95,7 +88,6 @@ fabric.properties
 .mtj.tmp/
 
 # Package Files #
-\
 
 .run/
 SecondWaveOptions.iml
