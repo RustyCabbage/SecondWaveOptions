@@ -147,6 +147,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         log.info("--------------------------------------------------");
     }
 
+    //todo restore suppressed mods
     @Override
     public void beforeGameSave() {
         for (FactionAPI faction : Global.getSector().getAllFactions()) {
