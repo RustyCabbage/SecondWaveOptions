@@ -1,0 +1,2 @@
+# SecondWaveOptions
+ starsector mod

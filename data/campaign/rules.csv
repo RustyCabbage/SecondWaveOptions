@@ -1,0 +1,24 @@
+id,trigger,conditions,script,text,options,notes
+secondwaveoptions_orbitalStorageInteraction1,PopulateOptions,"$hasMarket
+$menuState == main
+$tradeMode != NONE
+$faction.isNeutralFaction
+!$inspectedCargo
+$secondwaveoptions_noFreeStorage","RemoveOption marketOpenCargo
+SetTooltip marketLeave $marketLeaveTooltip
+SetShortcut marketLeave ""ESCAPE""",,,
+secondwaveoptions_StorageInteractionFleet1,PopulateOptions,"$hasMarket
+$menuState == main
+$tradeMode != NONE
+$faction.isNeutralFaction
+!$inspectedShips
+$secondwaveoptions_noFreeStorage","RemoveOption marketOpenFleet
+SetTooltip marketLeave $marketLeaveTooltip
+SetShortcut marketLeave ""ESCAPE""",,,
+secondwaveoptions_orbitalStorageInteractionRefit,PopulateOptions,"$hasMarket
+$menuState == main
+$tradeMode != NONE
+$faction.isNeutralFaction
+$secondwaveoptions_noFreeStorage","RemoveOption marketOpenRefit
+SetTooltip marketLeave $marketLeaveTooltip
+SetShortcut marketLeave ""ESCAPE""",,,

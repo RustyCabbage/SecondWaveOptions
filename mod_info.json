@@ -1,0 +1,23 @@
+{
+    "id":"RustyCabbage_SecondWaveOptions", # For the convenience of troubleshooters, include your name and the mod name, not just an acronym.
+	"name":"Second Wave Options", # Displayed to the player
+	"author":"RustyCabbage",
+    "utility":"false",
+	"version":"1.0.0",
+	"description":"Starsector IntelliJ template.",
+    "gameVersion": "0.96a-RC10",
+  	"jars":["jars/SecondWaveOptions.jar"],
+  	"modPlugin":"rc.SecondWaveOptions.SecondWaveOptionsModPlugin",
+    "dependencies": [
+    {
+        "id": "lw_lazylib",
+        "name": "LazyLib",
+        #"version": ""
+    },
+    {
+        "id": "lunalib",
+        "name": "LunaLib",
+        #"version": ""
+    },
+    ],
+}
