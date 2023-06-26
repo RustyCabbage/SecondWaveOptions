@@ -34,5 +34,5 @@
         "minor":0,
         "patch":0 \# Can be a number, character or string (1, 2, a, b, "-RC2", etc)
     },
-	\#"directDownloadURL":"",
+	"directDownloadURL":"https://github.com/RustyCabbage/SecondWaveOptions/releases/download/v1.0.0/SecondWaveOptions-v1.0.0.zip",
 }
