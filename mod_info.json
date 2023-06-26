@@ -4,7 +4,7 @@
 	"author":"RustyCabbage",
     "utility":"false",
 	"version":"1.0.0",
-	"description":"Starsector IntelliJ template.",
+	"description":"Options for adjusting gameplay.",
     "gameVersion": "0.96a-RC10",
   	"jars":["jars/SecondWaveOptions.jar"],
   	"modPlugin":"rc.SecondWaveOptions.SecondWaveOptionsModPlugin",
