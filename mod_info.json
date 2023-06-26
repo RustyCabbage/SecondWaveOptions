@@ -9,11 +9,11 @@
   	"jars":["jars/SecondWaveOptions.jar"],
   	"modPlugin":"rc.SecondWaveOptions.SecondWaveOptionsModPlugin",
     "dependencies": [
-    {
-        "id": "lw_lazylib",
-        "name": "LazyLib",
-        #"version": ""
-    },
+    #{
+    #    "id": "lw_lazylib",
+    #    "name": "LazyLib",
+    #    #"version": ""
+    #},
     {
         "id": "lunalib",
         "name": "LunaLib",
