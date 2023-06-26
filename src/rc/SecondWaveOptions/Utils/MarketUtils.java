@@ -35,7 +35,12 @@ public class MarketUtils {
     }
 
     public static FactionAPI getSystemOwner(StarSystemAPI starSystem, boolean excludePlayerFaction) {
-        FactionAPI systemOwner = Misc.getClaimingFaction(starSystem.getStar());
+        FactionAPI systemOwner = null;
+        try {
+            if (starSystem.getStar() != null) systemOwner = Misc.getClaimingFaction(starSystem.getStar());
+        } catch (Exception ex) {
+            log.error("Vanilla exploded for some reason", ex);
+        }
         if (systemOwner == null) {
             float maxScore = 0;
             for (FactionAPI faction : Global.getSector().getAllFactions()) {
