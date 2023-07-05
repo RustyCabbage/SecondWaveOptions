@@ -1,0 +1,48 @@
+Version 1.1.0-rc1 (pre-release)
+
+LunaSettings
+- Fixed up LunaLib descriptions and adjusted default options for some settings
+- Added different learning modes for Pirate Scholars:
+ - MANUAL uses the settings defined in LunaLib
+ - DYNAMIC bases it off your modlist
+- Added a new LunaLib setting for Pirate Scholars to tweak how much rarity affects chance of being picked
+- Added a new LunaLib setting for Pirate Scholars to allow them to learn hullmods. Default False.
+- Added a new LunaLib setting for Doctrine Scaling, that scales elite factions a little more heavily than regular factions
+- Added a new LunaLib setting for Doctrine Scaling, that allows a user defined faction blacklist for scaling mechanics
+- Increased the scaling effects of doctrine scaling
+- Added a multiplier to doctrine scaling for pirate factions depending on the number of player colonies
+- Commodity Scaling will now affect Local Resources as well. Updated the mechanics for it so that it results in less weird behavior.
+- Removed commodityVariationScale from LunaSettings as it has been deprecated
+
+Misc.
+- Added README.md
+- Improved logging
+
+Pirate Scholars
+- Fixed a crash that occurs when Pirates run out of things to learn.
+- Made module more robust to RNG stuff
+- Fixed a case where Learnables with 0 rarity would break the WeightedRandomPicker
+
+Secure Markets
+- Fixed a crash that would occur when selecting Own Faction start on Nex
+- Fixed giving Mayasuran Navy a Persean League station
+
+Suppress Bad Things
+- Now fixes itself upon game save, maintaining a true utility status for this mod 😎
+
+Version 1.0.0-rc2 (pre-release)
+
+- fixed version file issues
+- fixed crash in Misc code
+
+Version 1.0.0-rc1 (pre-release)
+
+# Current Features
+- 🔫 Autofit Tweaks (super minor, just reduces autofit randomness atm)
+- 🏴‍☠️ Pirate Scholars (now they can learn things automatically! 🤓 )
+- 📗 Blessed By Ludd (gives LP ships a chance to suppress Ill-Advised Mods)
+- 👑 Make Sindria Great Again (gives LG and Diktat ships a chance to suppress Special Modifications)
+- 📈 Doctrine Scaling (your favorite feature from last time, maybe, now better, maybe! if you're new here it means factions now scale, pog?)
+- 📉 Commodity Scaling (silly, experimental way of reducing the amount of commodities you can purchase in markets. stop engaging in arbitrage and go kill things)
+- 📵 No Free Storage (disables the free storage in the three abandoned stations in the Core Worlds. Ones outside the Core aren't affected, should they exist 👀)
+- 🔐 Secure Markets (that other feature that at least one person liked, more or less the same! markets have defenses and stations and in some cases, annoying patrols!)
