@@ -1,10 +1,10 @@
 package rc.SecondWaveOptions.MarketCrackdowns;
 
-import rc.SecondWaveOptions.Utils.MathUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import org.apache.log4j.Logger;
 import rc.SecondWaveOptions.SecondWaveOptionsModPlugin;
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class CommodityScalingListener extends BaseCampaignEventListener {
     Logger log = Global.getLogger(this.getClass());
     String KEY_submarketCommodityScale = "$secondwaveoptions_CommodityScale_%s_%s"; // submarket level key
-    float memoryDuration = 21f; // should be long enough that the market would naturally regenerate its usual maximum number of resources
+    float memoryDuration = 31f; // should be long enough that the market would naturally regenerate its usual maximum number of resources
     HashMap<String, HashMap<String, Integer>> submarketCommodityAmountsOnOpen = new HashMap<>();
     boolean marketCargoUpdated = false;
 
@@ -26,8 +26,11 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
     public enum SubmarketType {
         OPEN,
         BLACK_MARKET,
-        OTHER,
-        FREE_TRANSFER
+        MILITARY,
+        LOCAL_RESOURCES,
+        STORAGE,
+        OTHER_FREE_TRANSFER,
+        OTHER
     }
 
     @Override
@@ -52,14 +55,21 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
                     case BLACK_MARKET:
                         initializeCommodityScale(submarket, SecondWaveOptionsModPlugin.blackCommodityScale);
                         break;
+                    case MILITARY:
+                        initializeCommodityScale(submarket, SecondWaveOptionsModPlugin.militaryCommodityScale);
+                        break;
+                    case LOCAL_RESOURCES:
+                        initializeCommodityScale(submarket, SecondWaveOptionsModPlugin.lrCommodityScale);
+                        break;
+                    case STORAGE:
+                    case OTHER_FREE_TRANSFER:
+                        break;
                     case OTHER:
                         initializeCommodityScale(submarket, SecondWaveOptionsModPlugin.otherCommodityScale);
                         break;
-                    case FREE_TRANSFER:
-                        break;
                 }
             } else {
-                updateCommodities(submarket, SecondWaveOptionsModPlugin.commodityVariationScale);
+                updateCommodities(submarket);
             }
         }
         market.updatePrices();
@@ -129,30 +139,28 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
         submarket.getMarket().getMemoryWithoutUpdate().set(submarketKey, commodityMap, memoryDuration);
     }
 
-    public void updateCommodities(SubmarketAPI submarket, float variationScale) {
+    public void updateCommodities(SubmarketAPI submarket) {
         log.debug("Updating commodities for " + submarket.getSpecId() + " at " + submarket.getMarket().getId());
         String submarketKey = String.format(KEY_submarketCommodityScale, submarket.getMarket().getId(), submarket.getSpecId());
         HashMap<String, Integer> commodityMap = (HashMap<String, Integer>) submarket.getMarket().getMemoryWithoutUpdate().get(submarketKey);
         log.debug(commodityMap);
-        float allowedVariation = variationScale * MathUtils.clampValue((memoryDuration - submarket.getMarket().getMemoryWithoutUpdate().getExpire(submarketKey)) / memoryDuration
-                                                                               + MathUtils.getNormalRandom(0f, 0.1f), 0f, 1f);
-        //log.debug(allowedVariation);
         for (String commodityId : Global.getSector().getEconomy().getAllCommodityIds()) {
             float savedCommodityAmount = commodityMap.get(commodityId);
-            /*
-            log.debug(String.format("%s - %s: %s vs [%s,%s]",
-                    submarket.getSpecId(), commodityId, submarket.getCargo().getCommodityQuantity(commodityId)
-                    , savedCommodityAmount * (1 - allowedVariation)
-                    , savedCommodityAmount * (1 + allowedVariation)));
-            /**/
-            if (submarket.getCargo().getCommodityQuantity(commodityId) > savedCommodityAmount * (1 + allowedVariation)) {
-                float toRemove = submarket.getCargo().getCommodityQuantity(commodityId) - savedCommodityAmount * (1 + allowedVariation);
+            float commodityAmountDiff = submarket.getCargo().getCommodityQuantity(commodityId) - savedCommodityAmount;
+            if (commodityAmountDiff > 0) {
+                float commodityScale = getCommodityScaleForSubmarket(submarket);
+                /*
+                 f(x) = x/(2-x) satisfies
+                 f(x) is monotonic increasing from x=0 to x=1
+                 f(0) = 0, f(1) = 1
+                 concave up
+                 less than f(x) = x except at the end points
+                 greater than f(x) = x^2 except at the end points
+                */
+                float toKeep = commodityAmountDiff * commodityScale/(2-commodityScale);
+                float toRemove = commodityAmountDiff - toKeep;
                 log.debug(String.format("  Removing %s %s in %s to meet limits", toRemove, commodityId, submarket.getSpecId()));
-                submarket.getCargo().removeCommodity(commodityId, toRemove);
-            } else if (submarket.getCargo().getCommodityQuantity(commodityId) < savedCommodityAmount * (1 - allowedVariation)) {
-                float toAdd = savedCommodityAmount * (1 - allowedVariation) - submarket.getCargo().getCommodityQuantity(commodityId);
-                log.debug(String.format("  Adding %s %s in %s to meet limits", toAdd, commodityId, submarket.getSpecId()));
-                submarket.getCargo().addCommodity(commodityId, toAdd);
+                submarket.getCargo().removeCommodity(commodityId, commodityAmountDiff - toKeep);
             }
         }
     }
@@ -164,7 +172,7 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
         HashMap<String, HashMap<String, Integer>> submarketCommodityAmounts = new HashMap<>();
         if (market == null) return submarketCommodityAmounts;
         for (SubmarketAPI submarket : market.getSubmarketsCopy()) {
-            if (getSubmarketType(submarket) == SubmarketType.FREE_TRANSFER) {
+            if (getSubmarketType(submarket) == SubmarketType.OTHER_FREE_TRANSFER || getSubmarketType(submarket) == SubmarketType.STORAGE) {
                 continue;
             }
             HashMap<String, Integer> commodityAmounts = new HashMap<>();
@@ -177,9 +185,30 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
     }
 
     public SubmarketType getSubmarketType(SubmarketAPI submarket) {
-        if (submarket.getPlugin().isOpenMarket()) return SubmarketType.OPEN;
-        if (submarket.getPlugin().isBlackMarket()) return SubmarketType.BLACK_MARKET;
-        if (submarket.getPlugin().isFreeTransfer()) return SubmarketType.FREE_TRANSFER;
+        if (submarket.getPlugin().isOpenMarket() || submarket.getSpecId().equals(Submarkets.SUBMARKET_OPEN)) return SubmarketType.OPEN;
+        if (submarket.getPlugin().isBlackMarket() || submarket.getSpecId().equals(Submarkets.SUBMARKET_BLACK)) return SubmarketType.BLACK_MARKET;
+        if (submarket.getSpecId().equals(Submarkets.GENERIC_MILITARY)) return SubmarketType.MILITARY;
+        if (submarket.getSpecId().equals(Submarkets.LOCAL_RESOURCES)) return SubmarketType.LOCAL_RESOURCES;
+        if (submarket.getSpecId().equals(Submarkets.SUBMARKET_STORAGE)) return SubmarketType.STORAGE;
+        if (submarket.getPlugin().isFreeTransfer()) return SubmarketType.OTHER_FREE_TRANSFER;
         return SubmarketType.OTHER;
+    }
+
+    public float getCommodityScaleForSubmarket(SubmarketAPI submarket) {
+        SubmarketType type = getSubmarketType(submarket);
+        switch (type) {
+            case OPEN:
+                return SecondWaveOptionsModPlugin.openCommodityScale;
+            case BLACK_MARKET:
+                return SecondWaveOptionsModPlugin.blackCommodityScale;
+            case MILITARY:
+                return SecondWaveOptionsModPlugin.militaryCommodityScale;
+            case LOCAL_RESOURCES:
+                return SecondWaveOptionsModPlugin.lrCommodityScale;
+            case OTHER:
+                return SecondWaveOptionsModPlugin.otherCommodityScale;
+            default:
+                return 1;
+        }
     }
 }

@@ -8,6 +8,7 @@ import rc.SecondWaveOptions.Utils.MathUtils;
 
 //todo DynaSector
 public class AutofitTweaks {
+
     static Logger log = Global.getLogger(AutofitTweaks.class);
     public static String savedARPKey = String.format("$%s_%s", SecondWaveOptionsModPlugin.MOD_PREFIX, "savedARP"); //V is float
 

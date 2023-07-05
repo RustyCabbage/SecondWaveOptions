@@ -14,9 +14,15 @@ import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import rc.SecondWaveOptions.SecondWaveOptionsModPlugin;
+import rc.SecondWaveOptions.Utils.MathUtils;
 
+import java.io.IOException;
 import java.util.*;
 
 import static rc.SecondWaveOptions.SecondWaveOptionsModPlugin.*;
@@ -33,8 +39,14 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
         HULLMOD
     }
 
+    public enum LearningMode {
+        MANUAL,
+        DYNAMIC
+    }
+
     public PirateScholarsListener() {
         super(false);
+        log.setLevel(Level.INFO);
     }
 
     @Override
@@ -44,52 +56,85 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
     }
 
     public static void runAll(FactionAPI faction) {
-        long seed = Math.abs(faction.getDisplayName().hashCode()
-                                     + Global.getSector().getSeedString().hashCode()
-                                     + Global.getSector().getPlayerPerson().getNameString().hashCode());
-        int numLearningAttempts = genLearningAttempts(psLearningAttemptsPerMonth, psMonthsForBaseEffect);
+        long learningSeed = Math.abs(faction.getId().hashCode()
+                                             + Global.getSettings().getVersionString().hashCode()
+                                             + Global.getSector().getSeedString().hashCode());
+        long pickerSeed = Math.abs(faction.getDisplayName().hashCode()
+                                           + Global.getSettings().getGameVersion().hashCode()
+                                           + Global.getSector().getPlayerPerson().getNameString().hashCode()
+                                           + Global.getSector().getSeedString().hashCode());
+        //log.debug(learningSeed);
+        //log.debug(pickerSeed);
         forget(faction);
-        Set<Pair<String, LearnableType>> thingsToLearn = genThingsLearned(faction, seed, numLearningAttempts, psChance);
-        actuallyLearnThings(faction, thingsToLearn);
+        int numLearningAttempts = 0;
+        Set<Pair<String, LearnableType>> thingsToLearn = new HashSet<>();
+        if (psLearningMode.equals(LearningMode.MANUAL.toString())) {
+            numLearningAttempts = genLearningAttempts(psLearningAttemptsPerMonth, psMonthsForBaseEffect);
+            thingsToLearn = genThingsLearned(faction, pickerSeed, learningSeed, numLearningAttempts, psChance);
+        } else {
+            Pair<Integer, Float> dynamicLearning = getDynamicLearning();
+            numLearningAttempts = genLearningAttempts(dynamicLearning.one, psMonthsForBaseEffect);
+            thingsToLearn = genThingsLearned(faction, pickerSeed, learningSeed, numLearningAttempts, dynamicLearning.two);
+        }
+        if (!thingsToLearn.isEmpty()) actuallyLearnThings(faction, thingsToLearn);
     }
 
     // should be regenerated every time in case you sell stuff to the faction, and they learn something new
-    public static Set<Pair<String, LearnableType>> genThingsLearned(FactionAPI faction, long seed, int numLearningAttempts, float learningChance) {
+    public static Set<Pair<String, LearnableType>> genThingsLearned(FactionAPI faction, long pickerSeed, long learningSeed, int numLearningAttempts, float learningChance) {
         Set<Pair<String, LearnableType>> thingsLearned = new HashSet<>();
-        Random random = new Random(seed);
-        WeightedRandomPicker<Pair<String, LearnableType>> picker = new WeightedRandomPicker<>(random);
-        if (true) {
-            addShipsToPicker(faction, picker);
+        Random pickerRandom = new Random(pickerSeed);
+        Random learningRandom = new Random(learningSeed);
+        for (int i = 0; i < 10; i++) {
+            float a = pickerRandom.nextFloat();
+            float b = learningRandom.nextFloat();
+            //log.debug(a + " " + b);
         }
-        if (true) {
-            addWeaponsToPicker(faction, picker);
+        WeightedRandomPicker<Pair<String, LearnableType>> picker = new WeightedRandomPicker<>(pickerRandom);
+        addShipsToPicker(faction, picker, psWeightPower);
+        addWeaponsToPicker(faction, picker, psWeightPower);
+        addFightersToPicker(faction, picker, psWeightPower);
+
+        if (psLearnHullMods) {
+            addHullModsToPicker(faction, picker, psWeightPower);
         }
-        if (true) {
-            addFightersToPicker(faction, picker);
-        }
-        if (false) {
-            addHullModsToPicker(faction, picker);
-        }
-        if (picker.isEmpty()) return thingsLearned;
         /*
+        List<String> pickItem = new ArrayList<>();
+        HashMap<String, Float> pickWeight = new HashMap<>();
         HashMap<String, Float> pickProbabilityPercent = new HashMap<>();
         for (Pair<String, LearnableType> pick : picker.getItems()) {
-            pickProbabilityPercent.put(pick.one, picker.getWeight(pick)/picker.getTotal()*100);
+            pickItem.add(pick.one);
+            pickWeight.put(pick.one, picker.getWeight(pick));
+            pickProbabilityPercent.put(pick.one, picker.getWeight(pick) / picker.getTotal() * 100);
         }
+        log.debug(pickItem);
+        log.debug(pickWeight);
         log.debug(pickProbabilityPercent);
+        log.debug(picker.getTotal());
         /**/
-        for (int i = 0; i < numLearningAttempts; i++) {
-            if (random.nextFloat() < learningChance) {
+        int numLearnableTechs = picker.getItems().size();
+        log.info(String.format("Learnable Techs: %s",numLearnableTechs));
+        for (int i = 0; i < numLearningAttempts && !picker.isEmpty(); i++) {
+            float nextFloat = learningRandom.nextFloat();
+            if (nextFloat < learningChance) {
+                //picker.print(String.format("Learning attempt %s",i+1));
                 Pair<String, LearnableType> pick = picker.pickAndRemove();
+                log.debug(String.format("Learning attempt %s: Picked [%s,%s]", i + 1, pick.one, pick.two));
                 thingsLearned.add(pick);
+                if (picker.isEmpty()) log.info("Learned All Techs.");
+            } else {
+                //log.debug(String.format("Learning attempt %s: Failed to pick with %s > %s", i + 1, nextFloat, learningChance));
             }
         }
+        if (!picker.isEmpty()) log.info(String.format("Learned %s Techs.",numLearnableTechs-picker.getItems().size()));
         faction.getMemoryWithoutUpdate().set(thingsLearnedKey, thingsLearned);
+        //log.debug(thingsLearned);
         return thingsLearned;
     }
 
     public static void actuallyLearnThings(FactionAPI faction, Set<Pair<String, LearnableType>> thingsToLearn) {
+        if (thingsToLearn.isEmpty()) return;
         for (Pair<String, LearnableType> thingToLearn : thingsToLearn) {
+            if (thingToLearn.one == null || thingToLearn.two == null) continue;
             switch (thingToLearn.two) {
                 case HULL:
                     faction.addKnownShip(thingToLearn.one, true);
@@ -104,7 +149,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                     faction.addKnownHullMod(thingToLearn.one);
                     break;
             }
-            log.debug(String.format("Learned %s of type %s",thingToLearn.one, thingToLearn.two));
+            //log.debug(String.format("Learned %s of type %s", thingToLearn.one, thingToLearn.two));
         }
     }
 
@@ -130,7 +175,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
         faction.getMemoryWithoutUpdate().unset(thingsLearnedKey);
     }
 
-    public static void addShipsToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker) {
+    public static void addShipsToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker, float weightPower) {
         List<String> DISALLOWED_TAGS = Arrays.asList(
                 Tags.NO_SELL, Tags.NO_DROP, Tags.NO_BP_DROP, Tags.HULLMOD_NO_DROP_SALVAGE
                 , Tags.TAG_NO_AUTOFIT, Tags.AUTOMATED_RECOVERABLE, Tags.OMEGA, Tags.RESTRICTED);
@@ -145,11 +190,11 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                     || !Collections.disjoint(spec.getHints(), DISALLOWED_HINTS)) continue;
             String id = spec.getHullId();
             if (!faction.getKnownShips().contains(id)) {
-                float weight = 1f / (spec.getRarity());
+                float weight = 1f / Math.min(1, spec.getRarity());
                 if (spec.hasTag(Items.TAG_RARE_BP)) weight *= 0.25f;
                 switch (spec.getHullSize()) {
                     case CAPITAL_SHIP:
-                        weight *= 0.1f;
+                        weight *= 0.2f;
                         break;
                     case CRUISER:
                         weight *= 0.5f;
@@ -161,16 +206,18 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                     default:
                         break;
                 }
-                picker.add(new Pair<>(id, LearnableType.HULL), (float) Math.pow(weight, 2));
+                picker.add(new Pair<>(id, LearnableType.HULL), (float) Math.pow(weight, weightPower));
             }
         }
     }
 
-    public static void addWeaponsToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker) {
+
+    public static void addWeaponsToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker, float weightPower) {
         List<String> DISALLOWED_TAGS = Arrays.asList(
                 Tags.NO_SELL, Tags.NO_DROP, Tags.NO_BP_DROP, Tags.HULLMOD_NO_DROP_SALVAGE, Tags.OMEGA, Tags.RESTRICTED);
         for (WeaponSpecAPI spec : Global.getSettings().getAllWeaponSpecs()) {
-            if (!Collections.disjoint(spec.getTags(), DISALLOWED_TAGS)
+            if (spec.getRarity() == 0f
+                    || !Collections.disjoint(spec.getTags(), DISALLOWED_TAGS)
                     || spec.getAIHints().contains(WeaponAPI.AIHints.SYSTEM)) continue;
             boolean autofit = false;
             for (String tag : spec.getTags()) {
@@ -181,7 +228,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
             }
             String id = spec.getWeaponId();
             if (!faction.getKnownWeapons().contains(id) && autofit) {
-                float weight = 1f / ((spec.getTier() + 1) * spec.getRarity());
+                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.000001f, 1f);
                 switch (spec.getSize()) {
                     case LARGE:
                         weight *= 0.5f;
@@ -193,16 +240,17 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                         weight *= 1f;
                         break;
                 }
-                picker.add(new Pair<>(id, LearnableType.WEAPON), (float) Math.pow(weight, 2));
+                picker.add(new Pair<>(id, LearnableType.WEAPON), (float) Math.pow(weight, weightPower));
             }
         }
     }
 
-    public static void addFightersToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker) {
+    public static void addFightersToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker, float weightPower) {
         List<String> DISALLOWED_TAGS = Arrays.asList(
                 Tags.NO_SELL, Tags.NO_DROP, Tags.NO_BP_DROP, Tags.HULLMOD_NO_DROP_SALVAGE, Tags.OMEGA, Tags.RESTRICTED);
         for (FighterWingSpecAPI spec : Global.getSettings().getAllFighterWingSpecs()) {
-            if (!Collections.disjoint(spec.getTags(), DISALLOWED_TAGS)) continue;
+            if (spec.getRarity() == 0f
+                    || !Collections.disjoint(spec.getTags(), DISALLOWED_TAGS)) continue;
             boolean autofit = false;
             for (String tag : spec.getTags()) {
                 if (Character.isDigit(tag.charAt(tag.length() - 1))) {
@@ -212,7 +260,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
             }
             String id = spec.getId();
             if (!faction.getKnownFighters().contains(id) && autofit) {
-                float weight = 1f / ((spec.getTier() + 1) * spec.getRarity());
+                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.000001f, 1f);
                 if (spec.getOpCost(null) < 8 + 1) {
                     weight *= 1f;
                 } else if (spec.getOpCost(null) < 8 * 2 + 1)
@@ -220,12 +268,12 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                 else {
                     weight *= 0.5f;
                 }
-                picker.add(new Pair<>(id, LearnableType.FIGHTER), (float) Math.pow(weight, 2));
+                picker.add(new Pair<>(id, LearnableType.FIGHTER), (float) Math.pow(weight, weightPower));
             }
         }
     }
 
-    public static void addHullModsToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker) {
+    public static void addHullModsToPicker(FactionAPI faction, WeightedRandomPicker<Pair<String, LearnableType>> picker, float weightPower) {
         List<String> DISALLOWED_TAGS = Arrays.asList(
                 Tags.NO_DROP, Tags.NO_SELL, Tags.NO_BP_DROP, Tags.HULLMOD_NO_DROP_SALVAGE, Tags.HULLMOD_DMOD);
         List<String> REQUIRED_TAGS = Arrays.asList(Tags.HULLMOD_OFFENSIVE, Tags.HULLMOD_DEFENSIVE, Tags.HULLMOD_ENGINES);
@@ -233,12 +281,13 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
             if (spec.isHidden()
                     || spec.isHiddenEverywhere()
                     || spec.isAlwaysUnlocked()
+                    || spec.getRarity() == 0f
                     || !Collections.disjoint(spec.getTags(), DISALLOWED_TAGS)
                     || Collections.disjoint(spec.getTags(), REQUIRED_TAGS)) continue;
             String id = spec.getId();
             if (!faction.getKnownHullMods().contains(id)) {
-                float weight = 1f / ((spec.getTier() + 1) * spec.getRarity());
-                picker.add(new Pair<>(id, LearnableType.HULLMOD), (float) Math.pow(weight, 2));
+                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.000001f, 1f);
+                picker.add(new Pair<>(id, LearnableType.HULLMOD), (float) Math.pow(weight, weightPower));
             }
         }
     }
@@ -246,6 +295,59 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
     public static int genLearningAttempts(int learningAttemptsPerMonth, int monthsForBaseEffect) {
         int cyclesPassed = Global.getSector().getClock().getCycle() - 206;
         int monthsPassed = 12 * cyclesPassed + Global.getSector().getClock().getMonth() - 3;
-        return Math.max(0, learningAttemptsPerMonth * (monthsPassed - monthsForBaseEffect));
+        int numLearningAttempts = Math.max(0, learningAttemptsPerMonth * (monthsPassed - monthsForBaseEffect));
+        log.debug(String.format("Current date: %s", Global.getSector().getClock().getDateString()));
+        log.debug(String.format("Num Learning Attempts: %s", numLearningAttempts));
+        return numLearningAttempts;
+    }
+
+    public static Pair<Integer, Float> getDynamicLearning() {
+        Set<String> sources = new HashSet<>();
+        try {
+            JSONArray shipData = Global.getSettings().getMergedSpreadsheetDataForMod("fs_rowSource", "data/hulls/ship_data.csv", "starsector-core");
+            for (int i = 0; i < shipData.length(); i++) {
+                JSONObject row = shipData.getJSONObject(i);
+                String source = row.getString("fs_rowSource");
+                String toAdd = source.substring(Math.max(0, source.indexOf("..")), source.indexOf("data"));
+                sources.add(toAdd);
+            }
+            JSONArray weaponData = Global.getSettings().getMergedSpreadsheetDataForMod("fs_rowSource", "data/weapons/weapon_data.csv", "starsector-core");
+            for (int i = 0; i < weaponData.length(); i++) {
+                JSONObject row = weaponData.getJSONObject(i);
+                String source = row.getString("fs_rowSource");
+                String toAdd = source.substring(Math.max(0, source.indexOf("..")), source.indexOf("data"));
+                sources.add(toAdd);
+            }
+            JSONArray wingData = Global.getSettings().getMergedSpreadsheetDataForMod("fs_rowSource", "data/hulls/wing_data.csv", "starsector-core");
+            for (int i = 0; i < wingData.length(); i++) {
+                JSONObject row = wingData.getJSONObject(i);
+                String source = row.getString("fs_rowSource");
+                String toAdd = source.substring(Math.max(0, source.indexOf("..")), source.indexOf("data"));
+                sources.add(toAdd);
+            }
+            if (psLearnHullMods) {
+                JSONArray hullModData = Global.getSettings().getMergedSpreadsheetDataForMod("fs_rowSource", "data/hullmods/hull_mods.csv", "starsector-core");
+                for (int i = 0; i < hullModData.length(); i++) {
+                    JSONObject row = hullModData.getJSONObject(i);
+                    String source = row.getString("fs_rowSource");
+                    String toAdd = source.substring(Math.max(0, source.indexOf("..")), source.indexOf("data"));
+                    sources.add(toAdd);
+                }
+            }
+        } catch (JSONException | IOException e) {
+            log.error("Failed to parse csv data", e);
+        }
+        int n = sources.size() + 2;
+        float C0 = 1f / (7 + n * n);
+        float q = (float) Math.pow(C0, (float) 1 / (2 * n));
+        float p = 1 - q;
+        /*
+        float E = n*p;
+        float V = n*p*q;
+        log.debug(String.format("%s %s %s %s %s %s",n,C0,p,q,E,V));
+        /**/
+        log.info(String.format("Learning Attempts Per Month: %s", n));
+        log.info(String.format("Learning Chance: %s", p));
+        return new Pair<>(n, p);
     }
 }

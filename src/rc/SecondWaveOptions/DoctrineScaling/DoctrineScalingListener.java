@@ -7,7 +7,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.magiclib.util.MagicSettings;
 import rc.SecondWaveOptions.SecondWaveOptionsModPlugin;
 import rc.SecondWaveOptions.Utils.MarketUtils;
 
@@ -65,20 +67,37 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
 
     public DoctrineScalingListener() {
         super(false);
+        log.setLevel(Level.INFO);
     }
 
     @Override
     public void reportEconomyMonthEnd() {
-        log.debug("-----------------");
-        log.debug("Economy Month End");
-        log.debug("-----------------");
+        // Print the current time
+        log.info("-----------------");
+        log.info("Economy Month End");
+        log.info("-----------------");
+        /*
+        try {
+            if (Global.getSector().getClock().getMonth() == 4)
+                TimeUtils.saveTime();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        /**/
         for (FactionAPI faction : Global.getSector().getAllFactions()) {
             if (isValidFaction(faction)) runAll(faction, true);
         }
     }
 
     public static boolean isValidFaction(FactionAPI faction) {
-        return !(faction.isPlayerFaction());
+        boolean isValid = true;
+        if (faction.isPlayerFaction() || faction.getKnownShips().isEmpty()) isValid = false;
+        if (dsUseFactionBlacklist
+                && Global.getSettings().getModManager().isModEnabled("MagicLib")) {
+            List<String> blacklistedFactions = MagicSettings.getList(MOD_ID, "dsFactionBlacklist");
+            if (blacklistedFactions.contains(faction.getId())) isValid = false;
+        }
+        return isValid;
     }
 
     public static void runAll(FactionAPI faction, boolean doResearch) {
@@ -122,6 +141,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
     public static float getFactionScoreFromMarkets(FactionAPI faction, MarketUtils.MarketScoreType marketScoreType
             , float marketSizePower, float sprawlPenaltyPower) {
         List<MarketAPI> sortedFactionMarkets = MarketUtils.getSortedFactionMarkets(faction, marketScoreType, marketSizePower);
+        float eliteMultiplier = 1 + dsEliteFactionBonus * Math.max(0, faction.getDoctrine().getTotalStrengthPoints() - 7);
         float factionScore = 0;
         float marketScore = 0;
         for (int i = 0; i < sortedFactionMarkets.size(); i++) {
@@ -139,7 +159,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
                     break;
             }
             //log.debug(String.format("Market score %s for %s: %s", marketScoreType, sortedFactionMarkets.get(i).getId(), marketScore));
-            factionScore += marketScore;
+            factionScore += marketScore * eliteMultiplier;
         }
         return factionScore;
     }
@@ -156,8 +176,9 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
     }
 
     public static FactionScoreData scaleFactionScoreNoMarket(FactionScoreData factionScoreData, float baseMultiplier, float growthMultiplier) {
-        factionScoreData.base *= baseMultiplier;
-        factionScoreData.growth *= growthMultiplier;
+        float eliteMultiplier = 1 + dsEliteFactionBonus * Math.max(0, factionScoreData.faction.getDoctrine().getTotalStrengthPoints() - 7);
+        factionScoreData.base *= baseMultiplier * eliteMultiplier;
+        factionScoreData.growth *= growthMultiplier * eliteMultiplier;
         return factionScoreData;
     }
 
@@ -186,8 +207,10 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
             , float baseScalingPerColony, float growthScalingPerColony) {
         int numColonies = Misc.getPlayerMarkets(false).size();
         int effectiveNumColonies = numColonies - coloniesForBaseEffect;
-        factionScoreData.base *= 1 + (effectiveNumColonies * baseScalingPerColony);
-        factionScoreData.growth *= 1 + (effectiveNumColonies * growthScalingPerColony);
+        float total = effectiveNumColonies * baseScalingPerColony;
+        if (Misc.isPirateFaction(factionScoreData.faction)) total *= dsColonyMultiplierForPirates;
+        factionScoreData.base *= 1 + total;
+        factionScoreData.growth *= 1 + total;
         log.debug(String.format("Faction score after colonies: %s", factionScoreData));
         return factionScoreData;
     }
@@ -275,7 +298,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
     public void restoreDoctrineStats(FactionScoreData factionScoreData) {
         int[] doctrineStats = (int[]) factionScoreData.faction.getMemoryWithoutUpdate().get(savedDoctrineKey);
         if (doctrineStats == null) {
-            log.debug(String.format("No saved doctrine stats found for %s", factionScoreData.faction));
+            log.info(String.format("No saved doctrine stats found for %s", factionScoreData.faction));
             return;
         }
         for (DoctrineStat doctrineStat : DoctrineStat.values()) {
@@ -291,7 +314,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
                     break;
             }
         }
-        log.debug(String.format("Restored doctrine stats %s", Arrays.toString(doctrineStats)));
+        log.info(String.format("Restored doctrine stats %s", Arrays.toString(doctrineStats)));
     }
 
     public static void restoreDoctrineStats(FactionAPI faction) {
@@ -354,6 +377,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
                 log.debug(String.format("Cost for %s: %s", doctrineStat, cost));
                 Pair<DoctrineStat, Float> item = new Pair<>(doctrineStat, cost);
                 if (allocatablePoints < cost) continue;
+                /*
                 int stat = 1;
                 switch (doctrineStat) {
                     case OFFICER_QUALITY:
@@ -366,7 +390,8 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
                         stat = factionScoreData.faction.getDoctrine().getNumShips();
                         break;
                 }
-                float weight = 1f / (float) Math.sqrt(stat);
+                /**/
+                float weight = baseCost / cost;
                 picker.add(item, weight);
                 log.debug(String.format("Added <%s,%s> to picker with weight %s", item.one, item.two, weight));
             }
@@ -387,8 +412,8 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
             allocatablePoints -= pick.two;
             log.debug(String.format("[Picked %s for %s points with probability %s]", pick.one, pick.two, picker.getWeight(pick) / picker.getTotal()));
         }
-        log.debug(String.format("Allocation: %s", Arrays.toString(allocated)));
-        log.debug(String.format("New doctrine: [%s, %s, %s]"
+        log.info(String.format("Allocation: %s", Arrays.toString(allocated)));
+        log.info(String.format("New doctrine: [%s, %s, %s]"
                 , factionScoreData.faction.getDoctrine().getOfficerQuality()
                 , factionScoreData.faction.getDoctrine().getShipQuality()
                 , factionScoreData.faction.getDoctrine().getNumShips()));

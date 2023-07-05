@@ -28,8 +28,8 @@ public class SecureMarkets {
             log.debug("Star System: " + starSystem.getId());
             FactionAPI systemOwner = null;
             if (SecondWaveOptionsModPlugin.secureMarketsAddPatrols) {
-                systemOwner = MarketUtils.getSystemOwner(starSystem, true);
-                log.debug(starSystem + " is owned by " + systemOwner.getId());
+                systemOwner = MarketUtils.getSystemOwner(starSystem, false);
+                if (systemOwner != null) log.debug(starSystem + " is owned by " + systemOwner.getId());
                 log.debug("----------------------------------------");
             }
             // probably don't want to remove unique versions
@@ -40,6 +40,7 @@ public class SecureMarkets {
                     log.debug("Added patrol to " + market.getId() + "/" + market.getName() + ", code " + patrolCode);
                 }
                 if (SecondWaveOptionsModPlugin.secureMarketsAddStations) {
+                    if (Global.getSettings().getModManager().isModEnabled("Mayasuran Navy") && market.getId().equals("mairaath")) continue;
                     int stationCode = addStationsToMarket(market, SecondWaveOptionsModPlugin.secureMarketsStarFortressSize, SecondWaveOptionsModPlugin.secureMarketsBattlestationSize, SecondWaveOptionsModPlugin.secureMarketsOrbitalStationSize);
                     log.debug("Added station to " + market.getId() + "/" + market.getName() + ", code " + stationCode);
                 }

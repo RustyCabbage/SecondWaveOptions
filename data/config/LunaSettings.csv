@@ -15,16 +15,19 @@ secondwaveoptions_noFreeStorageEnable,Enable No Free Storage,Boolean,TRUE,,"[Ena
 secondwaveoptions_secureMarketsEnable,Enable Secure Markets,Boolean,TRUE,,"[Enables the Secure Markets feature.] Adds patrols, stations, defenses to starting markets. Tries to be sensible about placement. Affects [new games only], and obviously can't be undone.",,,
 
 secondwaveoptions_autofitTweaks,Autofit Tweaks,Header,Autofit Tweaks,,,,,Competent Foes
-secondwaveoptions_atAutofitRandomizeProbability,Autofit Randomize Probability,Double,0,,Sets the autofit randomize probability for all factions (including player) for slightly less insane autofits.,0,1,Competent Foes
+secondwaveoptions_atAutofitRandomizeProbability,Autofit Randomize Probability,Double,0,,Sets the [autofit randomize probability] for all factions (including player) for slightly less insane autofits.,0,1,Competent Foes
 secondwaveoptions_blessedByLudd,Blessed By Ludd,Header,Blessed By Ludd,,,,,Competent Foes
-secondwaveoptions_bblChance,Blessing Chance,Double,1,,Chance for a given Luddic Path ship to not suffer from ill-advised modifications.,0,1,Competent Foes
+secondwaveoptions_bblChance,Blessing Chance,Double,1,,Chance for a given [Luddic Path] ship to not suffer from [Ill-Advised Modifications].,0,1,Competent Foes
 secondwaveoptions_makeSindriaGreatAgain,Make Sindria Great Again,Header,Make Sindria Great Again,,,,,Competent Foes
-secondwaveoptions_msgaChance,Escape Notice Chance (Sindrian Diktat),Double,1,,Chance for a given Sindrian Diktat ship to evade Andrada's watchful eyes.,0,1,Competent Foes
-secondwaveoptions_mlggaChance,Escape Notice Chance (Lion's Guard),Double,1,,Chance for a given Lion's Guard ship to evade Andrada's watchful eyes.,0,1,Competent Foes
+secondwaveoptions_msgaChance,Escape Notice Chance (Sindrian Diktat),Double,1,,Chance for a given [Sindrian Diktat] ship to not suffer from [Special Modifications].,0,1,Competent Foes
+secondwaveoptions_mlggaChance,Escape Notice Chance (Lion's Guard),Double,1,,Chance for a given [Lion's Guard] ship to not suffer from [Special Modifications].,0,1,Competent Foes
 secondwaveoptions_pirateScholars,Pirate Scholars,Header,Pirate Scholars,,,,,Competent Foes
-secondwaveoptions_psChance,Learning Chance,Double,0.5,,Chance for the Pirates to learn a new technology per attempt.,0,1,Competent Foes
-secondwaveoptions_psLearningAttemptsPerMonth,Learning Attempts Per Month,Int,2,,Number of learning attempts per month.,0,100,Competent Foes
+secondwaveoptions_psLearningMode,Learning Mode,Radio,DYNAMIC,"MANUAL, DYNAMIC","Set the number of learning attempts yourself using the two options below, or use dynamic for it to automatically scale with the number of relevant mods",,,Competent Foes
+secondwaveoptions_psChance,Learning Chance,Double,0.37,,Chance for the Pirates to learn a new technology per attempt. [Only applies in MANUAL Learning Mode].,0,1,Competent Foes
+secondwaveoptions_psLearningAttemptsPerMonth,Learning Attempts Per Month,Int,3,,Number of learning attempts per month. [Only applies in MANUAL Learning Mode].,0,100,Competent Foes
 secondwaveoptions_psMonthsForBaseEffect,Months To Start Learning,Int,0,,Number of months that must elapse before pirates start learning.,0,100,Competent Foes
+secondwaveoptions_psWeightPower,Rarity Power,Double,1,,"Picker weight scaling factor. A weight of 0 gives all technologies equal weight, while higher values decrease the likelihood of rarer techs being learned.",0,3,Competent Foes
+secondwaveoptions_psLearnHullMods,Learn Hull Mods,Boolean,FALSE,,Whether or not pirates should also learn [hullmods]. This may have unintended consequences.,,,Competent Foes
 
 secondwaveoptions_doctrineScaling,Doctrine Scaling,Header,Doctrine Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingText,Doctrine Scaling Text,Text,"Returning feature! Adds a scaling mechanic to enemy factions that reacts to the shifting sector state. Every faction has a base score and a monthly growth in score, progress from which are stored independently of the base score.",,,,,Doctrine Scaling
@@ -32,24 +35,27 @@ secondwaveoptions_dsFlatBasePoints,Flat Base Points,Double,600,,Flat bonus to th
 secondwaveoptions_dsFlatGrowthPoints,Flat Growth Points,Double,5,,Flat bonus to the monthly increase in score ([score growth]) of every faction.,0,100,Doctrine Scaling
 secondwaveoptions_dsNoMarketBaseMultiplier,No Market Base Multiplier,Double,3,,Multiplier to the [base score] of market-less factions.,0,10,Doctrine Scaling
 secondwaveoptions_dsNoMarketGrowthMultiplier,No Market Growth Multiplier,Double,6,,Multiplier to the [score growth] of market-less factions.,0,10,Doctrine Scaling
+secondwaveoptions_dsEliteFactionBonus,Elite Faction Multiplier,Double,0.125,,"Multiplicative increase to the [base score] and [score growth] for elite factions, scaled by elite-ness and determined by [doctrine.getTotalStrengthScore()-7]",0,1,Doctrine Scaling
+secondwaveoptions_dsUseFactionBlacklist,Use Faction Blacklist,Boolean,FALSE,,Disables any factions listed in [/data/config/modSettings.json]. Requires [MagicLib].,,,Doctrine Scaling
 
-secondwaveoptions_doctrineScalingTimeHeader,Doctrine Scaling,Header,Time Scaling,,,,,Doctrine Scaling
+secondwaveoptions_doctrineScalingTimeHeader,Doctrine Time Scaling,Header,Time Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingTimeDesc,Doctrine Scaling Time Description,Text,"Factions scale over time in terms of months since March c206.",,,,,Doctrine Scaling
 secondwaveoptions_dsMonthForBaseEffect,Months For Base Time Effect,Int,12,,Number of months elapsed for [time] scaling to reach [zero].,0,100,Doctrine Scaling
-secondwaveoptions_dsBaseScalingPerMonth,Base Scaling Per Month,Double,0.004,,Multiplicative increase in [base score] per month.,-0.01,0.01,Doctrine Scaling
-secondwaveoptions_dsGrowthScalingPerMonth,Growth Scaling Per Month,Double,0.002,,Multiplicative increase in [score growth] per month.,-0.01,0.01,Doctrine Scaling
+secondwaveoptions_dsBaseScalingPerMonth,Base Scaling Per Month,Double,0.005,,Multiplicative increase in [base score] per month.,-0.02,0.02,Doctrine Scaling
+secondwaveoptions_dsGrowthScalingPerMonth,Growth Scaling Per Month,Double,0.0025,,Multiplicative increase in [score growth] per month.,-0.02,0.02,Doctrine Scaling
 
-secondwaveoptions_doctrineScalingLevelHeader,Doctrine Scaling,Header,Level Scaling,,,,,Doctrine Scaling
+secondwaveoptions_doctrineScalingLevelHeader,Doctrine Level Scaling,Header,Level Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingLevelDesc,Doctrine Scaling Level Description,Text,"Factions scale over player level.",,,,,Doctrine Scaling
 secondwaveoptions_dsLevelForBaseEffect,Levels For Base Level Effect,Int,5,,Level required for [level] scaling to reach [zero].,0,100,Doctrine Scaling
-secondwaveoptions_dsBaseScalingPerLevel,Base Scaling Per Level,Double,0.06,,Multiplicative increase in [base score] per level.,-0.1,0.1,Doctrine Scaling
-secondwaveoptions_dsGrowthScalingPerLevel,Growth Scaling Per Level,Double,0.03,,Multiplicative increase in [score growth] per level.,-0.1,0.1,Doctrine Scaling
+secondwaveoptions_dsBaseScalingPerLevel,Base Scaling Per Level,Double,0.1,,Multiplicative increase in [base score] per level.,-0.2,0.2,Doctrine Scaling
+secondwaveoptions_dsGrowthScalingPerLevel,Growth Scaling Per Level,Double,0.05,,Multiplicative increase in [score growth] per level.,-0.2,0.2,Doctrine Scaling
 
-secondwaveoptions_doctrineScalingColonyHeader,Doctrine Scaling,Header,Colony Scaling,,,,,Doctrine Scaling
+secondwaveoptions_doctrineScalingColonyHeader,Doctrine Colony Scaling,Header,Colony Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingColonyDesc,Doctrine Scaling Colony Description,Text,"Factions scale over number of player colonies.",,,,,Doctrine Scaling
-secondwaveoptions_dsColonyForBaseEffect,Colonies for Base Colony Effect,Int,1,,Colonies required for [colony] scaling to reach [zero].,0,100,Doctrine Scaling
-secondwaveoptions_dsBaseScalingPerColony,Base Scaling Per Colony,Double,0.06,,Multiplicative increase in [base score] per colony.,-0.1,0.1,Doctrine Scaling
-secondwaveoptions_dsGrowthScalingPerColony,Growth Scaling Per Colony,Double,0.03,,Multiplicative increase in [score growth] per colony.,-0.1,0.1,Doctrine Scaling
+secondwaveoptions_dsColonyForBaseEffect,Colonies For Base Colony Effect,Int,0,,Colonies required for [colony] scaling to reach [zero].,0,100,Doctrine Scaling
+secondwaveoptions_dsBaseScalingPerColony,Base Scaling Per Colony,Double,0.1,,Multiplicative increase in [base score] per colony.,-0.2,0.2,Doctrine Scaling
+secondwaveoptions_dsGrowthScalingPerColony,Growth Scaling Per Colony,Double,0.05,,Multiplicative increase in [score growth] per colony.,-0.2,0.2,Doctrine Scaling
+secondwaveoptions_dsColonyMultiplierForPirates,Colony Multiplier For Pirates,Double,2,,Colony scaling multiplier for [pirate] factions. Affects both [base score] and [score growth],0.2,5,Doctrine Scaling
 
 secondwaveoptions_doctrineScalingCostHeader,Doctrine Scaling,Header,Cost Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingCostDesc,Doctrine Scaling Cost Description,Text,"Factions scale their doctrine stats (officer quality, ship quality, num ships) by paying a cost for each additional point.",,,,,Doctrine Scaling
@@ -63,14 +69,16 @@ secondwaveoptions_doctrineScalingMechanicsText,Doctrine Scaling Text,Text,"Facti
 secondwaveoptions_dsBaseMarketSizePower,Base Market Size Power,Double,3,,[Base score] scaling factor as a function of market size.,0,5,Doctrine Scaling
 secondwaveoptions_dsBaseSprawlPenaltyPower,Base Sprawl Penalty Power,Double,0.5,,[Base score] sprawl penalty as a function of sorted market index. Lower means higher score.,0,2,Doctrine Scaling
 secondwaveoptions_dsGrowthMarketSizePower,Growth Market Size Power,Double,1,,[Score growth] scaling factor as a function of market size.,0,5,Doctrine Scaling
-secondwaveoptions_dsGrowthSprawlPenaltyPower,Growth Sprawl Penalty Power,Double,0.5,,[Score growth] sprawl penalty as a function of sorted market index. Lower means hgher score.,0,2,Doctrine Scaling
+secondwaveoptions_dsGrowthSprawlPenaltyPower,Growth Sprawl Penalty Power,Double,0.5,,[Score growth] sprawl penalty as a function of sorted market index. Lower means higher score.,0,2,Doctrine Scaling
 
 secondwaveoptions_commodityScaling,Commodity Scaling,Header,Commodity Scaling,,,,,Market Crackdowns
 secondwaveoptions_commodityScalingText,Commodity Scaling Text,Text,"Adjusts the proportion of commodities found in markets, including supplies, crew and fuel.",,,,,Market Crackdowns
-secondwaveoptions_openCommodityScale,Open Market Commodity Scale,Double,0.3,,Adjusts proportion of commodities found in [Open] Markets.,0,1,Market Crackdowns
-secondwaveoptions_blackCommodityScale,Black Market Commodity Scale,Double,0.2,,Adjusts proportion of commodities found in [Black] Markets.,0,1,Market Crackdowns
-secondwaveoptions_otherCommodityScale,Other Market Commodity Scale,Double,0.5,,Adjusts proportion of commodities found in [other] Markets (e.g. [Military] submarkets).,0,1,Market Crackdowns
-secondwaveoptions_commodityVariationScale,Commodity Variation Scale,Double,0.2,,Adjusts [variation] in proportion of commodities found in markets.,0,1,Market Crackdowns
+secondwaveoptions_openCommodityScale,Open Market Commodity Scale,Double,0.3,,Adjusts proportion of commodities found in [Open] Submarkets.,0,1,Market Crackdowns
+secondwaveoptions_blackCommodityScale,Black Market Commodity Scale,Double,0.2,,Adjusts proportion of commodities found in [Black] Submarkets.,0,1,Market Crackdowns
+secondwaveoptions_militaryCommodityScale,Military Market Commodity Scale,Double,0.5,,Adjusts proportion of commodities found in [Military] Submarkets.,0,1,Market Crackdowns
+secondwaveoptions_lrCommodityScale,Local Resource Market Commodity Scale,Double,0.1,,Adjusts proportion of commodities found in [Local Resource] Submarkets.,0,1,Market Crackdowns
+secondwaveoptions_otherCommodityScale,Other Market Commodity Scale,Double,0.5,,Adjusts proportion of commodities found in [other] Submarkets.,0,1,Market Crackdowns
+#secondwaveoptions_commodityVariationScale,Commodity Variation Scale,Double,0.2,,Adjusts [variation] in proportion of commodities found in markets.,0,1,Market Crackdowns
 
 secondwaveoptions_secureMarkets,Secure Markets,Header,Secure Markets,,,,,Market Crackdowns
 secondwaveoptions_secureMarketsText,Secure Markets Text,Text,"Returning feature! Adds patrols, stations, defenses to starting markets. Tries to be sensible about placement.",,,,,Market Crackdowns

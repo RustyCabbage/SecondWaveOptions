@@ -260,8 +260,6 @@ public class MarketUtils {
                 case Items.CORRUPTED_NANOFORGE:
                     industryMult *= nanoForgeMult[1];
                     break;
-                default:
-                    break;
             }
         }
         if (industry.getAICoreId() != null) {
@@ -274,8 +272,6 @@ public class MarketUtils {
                     break;
                 case Commodities.GAMMA_CORE:
                     industryMult *= aiCoreMult[2];
-                    break;
-                default:
                     break;
             }
         }

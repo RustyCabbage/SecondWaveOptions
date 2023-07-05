@@ -2,9 +2,12 @@ package rc.SecondWaveOptions;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.HullMods;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import lunalib.lunaSettings.LunaSettings;
 import org.apache.log4j.Level;
@@ -16,9 +19,11 @@ import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.CommodityScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.SecureMarkets;
 
+import static rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener.blessedByLuddKey;
+import static rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener.escapedNoticeKey;
 import static rc.SecondWaveOptions.Utils.MarketUtils.isInCore;
 
-//todo other plans: ai tweaks, combat ghost ship??,
+//todo other plans: ai tweaks
 public class SecondWaveOptionsModPlugin extends BaseModPlugin {
     public static String MOD_ID = "RustyCabbage_SecondWaveOptions";
     public static String MOD_PREFIX = "secondwaveoptions";
@@ -30,11 +35,16 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
     public static float
             atAutofitRandomizeProbability,
             bblChance, msgaChance, mlggaChance,
-            psChance;
+            psChance, psWeightPower;
+    public static String
+            psLearningMode;
+    public static boolean
+            psLearnHullMods;
     public static int
             psLearningAttemptsPerMonth, psMonthsForBaseEffect;
     public static float
-            openCommodityScale, blackCommodityScale, otherCommodityScale, commodityVariationScale;
+            openCommodityScale, blackCommodityScale, militaryCommodityScale, lrCommodityScale, otherCommodityScale;
+    //commodityVariationScale;
     public static boolean
             secureMarketsAddPatrols, secureMarketsAddStations, secureMarketsAddDefenses, secureMarketsAddHeavyInd;
     public static int
@@ -43,19 +53,20 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             secureMarketsHeavyBatteriesSize, secureMarketsGroundDefensesSize,
             secureMarketsOrbitalWorksSize, secureMarketsHeavyIndustrySize;
     public static float
-            dsFlatBasePoints, dsFlatGrowthPoints, dsNoMarketBaseMultiplier, dsNoMarketGrowthMultiplier,
+            dsFlatBasePoints, dsFlatGrowthPoints, dsNoMarketBaseMultiplier, dsNoMarketGrowthMultiplier, dsEliteFactionBonus,
             dsBaseScalingPerMonth, dsGrowthScalingPerMonth,
             dsBaseScalingPerLevel, dsGrowthScalingPerLevel,
-            dsBaseScalingPerColony, dsGrowthScalingPerColony,
+            dsBaseScalingPerColony, dsGrowthScalingPerColony, dsColonyMultiplierForPirates,
             dsBaseCostPerPoint, dsCostPerTotalPoints, dsCostPerAdditionalPoint, dsCostAboveVanilla,
             dsBaseMarketSizePower, dsBaseSprawlPenaltyPower, dsGrowthMarketSizePower, dsGrowthSprawlPenaltyPower;
+    public static boolean
+            dsUseFactionBlacklist;
     public static int
             dsMonthForBaseEffect, dsLevelForBaseEffect, dsColonyForBaseEffect;
     public String noFreeMarketsKey = String.format("$%s_%s", MOD_PREFIX, "noFreeStorage");//V is boolean
 
     @Override
     public void onApplicationLoad() {
-        Logger.getRootLogger().setLevel(Level.DEBUG);
         log.info("-----------------------------");
         log.info("Initializing LunaLib settings");
         log.info("-----------------------------");
@@ -94,6 +105,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
+        Logger.getRootLogger().setLevel(Level.INFO);
         log.info("--------------------------------------------------");
         log.info("Reloading LunaLib settings");
         loadLunaLibSettings();
@@ -150,11 +162,25 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
     //todo restore suppressed mods
     @Override
     public void beforeGameSave() {
+        // pirate scholars
+        PirateScholarsListener.forget(Global.getSector().getFaction(Factions.PIRATES));
+        // suppress bad things
+        for (LocationAPI loc : Global.getSector().getAllLocations()) {
+            for (CampaignFleetAPI f : loc.getFleets()) {
+                SuppressBadThingsListener.unsuppressBadThings(f, Factions.LUDDIC_PATH,
+                                                              HullMods.ILL_ADVISED, blessedByLuddKey, true, false);
+                SuppressBadThingsListener.unsuppressBadThings(f, Factions.DIKTAT,
+                                                              HullMods.ANDRADA_MODS, escapedNoticeKey, true, false);
+                SuppressBadThingsListener.unsuppressBadThings(f, Factions.LIONS_GUARD,
+                                                              HullMods.ANDRADA_MODS, escapedNoticeKey, true, false);
+            }
+        }
+        // doctrine scaling
         for (FactionAPI faction : Global.getSector().getAllFactions()) {
             DoctrineScalingListener.restoreDoctrineStats(faction);
             AutofitTweaks.restoreAutofitRandomizeProbability(faction);
         }
-        PirateScholarsListener.forget(Global.getSector().getFaction(Factions.PIRATES));
+        // no free storage
         for (SectorEntityToken token : Global.getSector().getEntitiesWithTag(noFreeMarketsKey)) {
             token.removeTag(noFreeMarketsKey);
             token.getMemoryWithoutUpdate().unset(noFreeMarketsKey);
@@ -171,6 +197,22 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         }
         if (enablePirateScholars) {
             PirateScholarsListener.runAll(Global.getSector().getFaction(Factions.PIRATES));
+        }
+        if (enableBlessedByLudd || enableMakeSindriaGreatAgain) {
+            for (LocationAPI loc : Global.getSector().getAllLocations()) {
+                for (CampaignFleetAPI f : loc.getFleets()) {
+                    if (enableBlessedByLudd && SuppressBadThingsListener.hasMemKey(f, blessedByLuddKey)) {
+                        SuppressBadThingsListener.suppressBadThings(f, Factions.LUDDIC_PATH,
+                                                                    HullMods.ILL_ADVISED, 1, blessedByLuddKey, false, false);
+                    }
+                    if (enableMakeSindriaGreatAgain && SuppressBadThingsListener.hasMemKey(f, escapedNoticeKey)) {
+                        SuppressBadThingsListener.suppressBadThings(f, Factions.DIKTAT,
+                                                                    HullMods.ANDRADA_MODS, 1, escapedNoticeKey, false, false);
+                        SuppressBadThingsListener.suppressBadThings(f, Factions.LIONS_GUARD,
+                                                                    HullMods.ANDRADA_MODS, 1, escapedNoticeKey, false, false);
+                    }
+                }
+            }
         }
         if (enableNoFreeStorage) {
             for (SectorEntityToken token : Global.getSector().getEntitiesWithTag(Tags.STATION)) {
@@ -201,16 +243,20 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         mlggaChance = LunaSettings.getFloat(MOD_ID, String.format("%s_mlggaChance", MOD_PREFIX));
         //pirate scholars
         enablePirateScholars = LunaSettings.getBoolean(MOD_ID, String.format("%s_pirateScholarsEnable", MOD_PREFIX));
+        psLearningMode = LunaSettings.getString(MOD_ID, String.format("%s_psLearningMode", MOD_PREFIX));
         psChance = LunaSettings.getFloat(MOD_ID, String.format("%s_psChance", MOD_PREFIX));
         psLearningAttemptsPerMonth = LunaSettings.getInt(MOD_ID, String.format("%s_psLearningAttemptsPerMonth", MOD_PREFIX));
         psMonthsForBaseEffect = LunaSettings.getInt(MOD_ID, String.format("%s_psMonthsForBaseEffect", MOD_PREFIX));
-
+        psWeightPower = LunaSettings.getFloat(MOD_ID, String.format("%s_psWeightPower", MOD_PREFIX));
+        psLearnHullMods = LunaSettings.getBoolean(MOD_ID, String.format("%s_psLearnHullMods", MOD_PREFIX));
         //Doctrine Scaling
         enableDoctrineScaling = LunaSettings.getBoolean(MOD_ID, String.format("%s_doctrineScalingEnable", MOD_PREFIX));
         dsFlatBasePoints = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFlatBasePoints", MOD_PREFIX));
         dsFlatGrowthPoints = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFlatGrowthPoints", MOD_PREFIX));
         dsNoMarketBaseMultiplier = LunaSettings.getFloat(MOD_ID, String.format("%s_dsNoMarketBaseMultiplier", MOD_PREFIX));
         dsNoMarketGrowthMultiplier = LunaSettings.getFloat(MOD_ID, String.format("%s_dsNoMarketGrowthMultiplier", MOD_PREFIX));
+        dsEliteFactionBonus = LunaSettings.getFloat(MOD_ID, String.format("%s_dsEliteFactionBonus", MOD_PREFIX));
+        dsUseFactionBlacklist = LunaSettings.getBoolean(MOD_ID, String.format("%s_dsUseFactionBlacklist", MOD_PREFIX));
         dsMonthForBaseEffect = LunaSettings.getInt(MOD_ID, String.format("%s_dsMonthForBaseEffect", MOD_PREFIX));
         dsBaseScalingPerMonth = LunaSettings.getFloat(MOD_ID, String.format("%s_dsBaseScalingPerMonth", MOD_PREFIX));
         dsGrowthScalingPerMonth = LunaSettings.getFloat(MOD_ID, String.format("%s_dsGrowthScalingPerMonth", MOD_PREFIX));
@@ -220,6 +266,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         dsColonyForBaseEffect = LunaSettings.getInt(MOD_ID, String.format("%s_dsColonyForBaseEffect", MOD_PREFIX));
         dsBaseScalingPerColony = LunaSettings.getFloat(MOD_ID, String.format("%s_dsBaseScalingPerColony", MOD_PREFIX));
         dsGrowthScalingPerColony = LunaSettings.getFloat(MOD_ID, String.format("%s_dsGrowthScalingPerColony", MOD_PREFIX));
+        dsColonyMultiplierForPirates = LunaSettings.getFloat(MOD_ID, String.format("%s_dsColonyMultiplierForPirates", MOD_PREFIX));
         dsBaseCostPerPoint = LunaSettings.getFloat(MOD_ID, String.format("%s_dsBaseCostPerPoint", MOD_PREFIX));
         dsCostPerTotalPoints = LunaSettings.getFloat(MOD_ID, String.format("%s_dsCostPerTotalPoints", MOD_PREFIX));
         dsCostPerAdditionalPoint = LunaSettings.getFloat(MOD_ID, String.format("%s_dsCostPerAdditionalPoint", MOD_PREFIX));
@@ -234,8 +281,10 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         enableCommodityScaling = LunaSettings.getBoolean(MOD_ID, String.format("%s_commodityScalingEnable", MOD_PREFIX));
         openCommodityScale = LunaSettings.getFloat(MOD_ID, String.format("%s_openCommodityScale", MOD_PREFIX));
         blackCommodityScale = LunaSettings.getFloat(MOD_ID, String.format("%s_blackCommodityScale", MOD_PREFIX));
+        militaryCommodityScale = LunaSettings.getFloat(MOD_ID, String.format("%s_militaryCommodityScale", MOD_PREFIX));
+        lrCommodityScale = LunaSettings.getFloat(MOD_ID, String.format("%s_lrCommodityScale", MOD_PREFIX));
         otherCommodityScale = LunaSettings.getFloat(MOD_ID, String.format("%s_otherCommodityScale", MOD_PREFIX));
-        commodityVariationScale = LunaSettings.getFloat(MOD_ID, String.format("%s_commodityVariationScale", MOD_PREFIX));
+        //commodityVariationScale = LunaSettings.getFloat(MOD_ID, String.format("%s_commodityVariationScale", MOD_PREFIX));
         //no free storage
         enableNoFreeStorage = LunaSettings.getBoolean(MOD_ID, String.format("%s_noFreeStorageEnable", MOD_PREFIX));
         //secure markets
