@@ -1,9 +1,8 @@
 # SecondWaveOptions
 Adds some simple, totally optional settings of varying silliness to spice up your game.
 
-*"Elevate your **Starsector** gameplay with the [mod name here] mod, the choice for serious players seeking advanced features and customization options."*
-
 # Current Features
+- 🧾 Book of Grudges (negative rep with factions--and optionally players--lingers)
 - 🔫 Autofit Tweaks (super minor, just reduces autofit randomness atm)
 - 🏴‍☠️ Pirate Scholars (now they can learn things automatically! 🤓 )
 - 📗 Blessed By Ludd (gives LP ships a chance to suppress Ill-Advised Mods)
