@@ -23,5 +23,5 @@ if you give me cool, easily implemented ideas, they probably won't get added to 
 
 # Links
 - Forum: outdated 
-- Download: **https://github.com/RustyCabbage/SecondWaveOptions/releases/download/v1.2.0-rc2/SecondWaveOptions-v1.2.0-rc2.zip**
+- Download: **https://github.com/RustyCabbage/SecondWaveOptions/releases/download/v1.2.0-rc1/SecondWaveOptions-v1.2.0-rc1.zip**
 - Source: <https://github.com/RustyCabbage/SecondWaveOptions/>
