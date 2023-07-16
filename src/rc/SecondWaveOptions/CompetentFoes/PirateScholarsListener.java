@@ -68,13 +68,17 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
         forget(faction);
         int numLearningAttempts = 0;
         Set<Pair<String, LearnableType>> thingsToLearn = new HashSet<>();
-        if (psLearningMode.equals(LearningMode.MANUAL.toString())) {
-            numLearningAttempts = genLearningAttempts(psLearningAttemptsPerMonth, psMonthsForBaseEffect);
-            thingsToLearn = genThingsLearned(faction, pickerSeed, learningSeed, numLearningAttempts, psChance);
-        } else {
-            Pair<Integer, Float> dynamicLearning = getDynamicLearning();
-            numLearningAttempts = genLearningAttempts(dynamicLearning.one, psMonthsForBaseEffect);
-            thingsToLearn = genThingsLearned(faction, pickerSeed, learningSeed, numLearningAttempts, dynamicLearning.two);
+        LearningMode learningMode = LearningMode.valueOf(psLearningMode);
+        switch (learningMode) {
+            case MANUAL:
+                numLearningAttempts = genLearningAttempts(psLearningAttemptsPerMonth, psMonthsForBaseEffect);
+                thingsToLearn = genThingsLearned(faction, pickerSeed, learningSeed, numLearningAttempts, psChance);
+                break;
+            case DYNAMIC:
+                Pair<Integer, Float> dynamicLearningParameters = getDynamicLearningParameters();
+                numLearningAttempts = genLearningAttempts(dynamicLearningParameters.one, psMonthsForBaseEffect);
+                thingsToLearn = genThingsLearned(faction, pickerSeed, learningSeed, numLearningAttempts, dynamicLearningParameters.two);
+                break;
         }
         if (!thingsToLearn.isEmpty()) actuallyLearnThings(faction, thingsToLearn);
     }
@@ -301,7 +305,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
         return numLearningAttempts;
     }
 
-    public static Pair<Integer, Float> getDynamicLearning() {
+    public static Pair<Integer, Float> getDynamicLearningParameters() {
         Set<String> sources = new HashSet<>();
         try {
             JSONArray shipData = Global.getSettings().getMergedSpreadsheetDataForMod("fs_rowSource", "data/hulls/ship_data.csv", "starsector-core");

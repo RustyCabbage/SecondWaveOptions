@@ -1,3 +1,12 @@
+Version 1.2.0-rc1
+
+- New feature: Book of Grudges. Losing rep with factions (and optionally people) becomes semi-permanent
+- LunaSetting description improvements, and new settings for Book of Grudges
+- LunaLib now shows changelog in version checker
+- General code cleanup and better commenting
+- Fixed a crash with Commodity Scaling
+- Commodity Scaling now properly checks the time until the next market update
+
 Version 1.1.0-rc1 (pre-release)
 
 LunaSettings
@@ -37,7 +46,7 @@ Version 1.0.0-rc2 (pre-release)
 
 Version 1.0.0-rc1 (pre-release)
 
-# Current Features
+Current Features
 - 🔫 Autofit Tweaks (super minor, just reduces autofit randomness atm)
 - 🏴‍☠️ Pirate Scholars (now they can learn things automatically! 🤓 )
 - 📗 Blessed By Ludd (gives LP ships a chance to suppress Ill-Advised Mods)

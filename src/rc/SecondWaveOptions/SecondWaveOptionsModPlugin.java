@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import rc.SecondWaveOptions.CompetentFoes.AutofitTweaks;
 import rc.SecondWaveOptions.CompetentFoes.PirateScholarsListener;
 import rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener;
+import rc.SecondWaveOptions.DoctrineScaling.BookOfGrudgesListener;
 import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.CommodityScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.SecureMarkets;
@@ -29,24 +30,23 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
     public static String MOD_PREFIX = "secondwaveoptions";
     Logger log = Global.getLogger(SecondWaveOptionsModPlugin.class);
     public static boolean
+            enableBookOfGrudges,
             enableAutofitTweaks, enableBlessedByLudd, enableMakeSindriaGreatAgain, enablePirateScholars,
             enableDoctrineScaling,
             enableCommodityScaling, enableNoFreeStorage, enableSecureMarkets;
+    public static String bogGrudgeMode;
+    public static boolean bogIncludePersons;
+    public static int bogDuration;
     public static float
             atAutofitRandomizeProbability,
             bblChance, msgaChance, mlggaChance,
             psChance, psWeightPower;
-    public static String
-            psLearningMode;
-    public static boolean
-            psLearnHullMods;
-    public static int
-            psLearningAttemptsPerMonth, psMonthsForBaseEffect;
-    public static float
-            openCommodityScale, blackCommodityScale, militaryCommodityScale, lrCommodityScale, otherCommodityScale;
+    public static String psLearningMode;
+    public static boolean psLearnHullMods;
+    public static int psLearningAttemptsPerMonth, psMonthsForBaseEffect;
+    public static float openCommodityScale, blackCommodityScale, militaryCommodityScale, lrCommodityScale, otherCommodityScale;
     //commodityVariationScale;
-    public static boolean
-            secureMarketsAddPatrols, secureMarketsAddStations, secureMarketsAddDefenses, secureMarketsAddHeavyInd;
+    public static boolean secureMarketsAddPatrols, secureMarketsAddStations, secureMarketsAddDefenses, secureMarketsAddHeavyInd;
     public static int
             secureMarketsHighCommandSize, secureMarketsMilitaryBaseSize, secureMarketsPatrolHQSize,
             secureMarketsStarFortressSize, secureMarketsBattlestationSize, secureMarketsOrbitalStationSize,
@@ -59,10 +59,8 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             dsBaseScalingPerColony, dsGrowthScalingPerColony, dsColonyMultiplierForPirates,
             dsBaseCostPerPoint, dsCostPerTotalPoints, dsCostPerAdditionalPoint, dsCostAboveVanilla,
             dsBaseMarketSizePower, dsBaseSprawlPenaltyPower, dsGrowthMarketSizePower, dsGrowthSprawlPenaltyPower;
-    public static boolean
-            dsUseFactionBlacklist;
-    public static int
-            dsMonthForBaseEffect, dsLevelForBaseEffect, dsColonyForBaseEffect;
+    public static boolean dsUseFactionBlacklist;
+    public static int dsMonthForBaseEffect, dsLevelForBaseEffect, dsColonyForBaseEffect;
     public String noFreeMarketsKey = String.format("$%s_%s", MOD_PREFIX, "noFreeStorage");//V is boolean
 
     @Override
@@ -110,6 +108,11 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         log.info("Reloading LunaLib settings");
         loadLunaLibSettings();
 
+        if (enableBookOfGrudges) {
+            BookOfGrudgesListener bookOfGrudgesListener = new BookOfGrudgesListener();
+            log.info("Adding " + bookOfGrudgesListener.getClass().getName());
+            Global.getSector().addTransientListener(bookOfGrudgesListener);
+        }
         if (enableAutofitTweaks) {
             for (FactionAPI faction : Global.getSector().getAllFactions()) {
                 AutofitTweaks.saveAutofitRandomizeProbability(faction);
@@ -230,7 +233,12 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
     }
 
     public void loadLunaLibSettings() {
-        // Competent Foes
+        // // Book of Grudges
+        enableBookOfGrudges = LunaSettings.getBoolean(MOD_ID, String.format("%s_bookOfGrudgesEnable", MOD_PREFIX));
+        bogGrudgeMode = LunaSettings.getString(MOD_ID, String.format("%s_bogGrudgeMode", MOD_PREFIX));
+        bogIncludePersons = LunaSettings.getBoolean(MOD_ID, String.format("%s_bogIncludePersons", MOD_PREFIX));
+        bogDuration = LunaSettings.getInt(MOD_ID, String.format("%s_bogDuration", MOD_PREFIX));
+        // // Competent Foes
         //autofit tweaks
         enableAutofitTweaks = LunaSettings.getBoolean(MOD_ID, String.format("%s_autofitTweaksEnable", MOD_PREFIX));
         atAutofitRandomizeProbability = LunaSettings.getFloat(MOD_ID, String.format("%s_atAutofitRandomizeProbability", MOD_PREFIX));
@@ -249,7 +257,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         psMonthsForBaseEffect = LunaSettings.getInt(MOD_ID, String.format("%s_psMonthsForBaseEffect", MOD_PREFIX));
         psWeightPower = LunaSettings.getFloat(MOD_ID, String.format("%s_psWeightPower", MOD_PREFIX));
         psLearnHullMods = LunaSettings.getBoolean(MOD_ID, String.format("%s_psLearnHullMods", MOD_PREFIX));
-        //Doctrine Scaling
+        // // Doctrine Scaling
         enableDoctrineScaling = LunaSettings.getBoolean(MOD_ID, String.format("%s_doctrineScalingEnable", MOD_PREFIX));
         dsFlatBasePoints = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFlatBasePoints", MOD_PREFIX));
         dsFlatGrowthPoints = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFlatGrowthPoints", MOD_PREFIX));
@@ -276,7 +284,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         dsGrowthMarketSizePower = LunaSettings.getFloat(MOD_ID, String.format("%s_dsGrowthMarketSizePower", MOD_PREFIX));
         dsGrowthSprawlPenaltyPower = LunaSettings.getFloat(MOD_ID, String.format("%s_dsGrowthSprawlPenaltyPower", MOD_PREFIX));
 
-        // Market Crackdowns
+        // // Market Crackdowns
         //commodity scaling
         enableCommodityScaling = LunaSettings.getBoolean(MOD_ID, String.format("%s_commodityScalingEnable", MOD_PREFIX));
         openCommodityScale = LunaSettings.getFloat(MOD_ID, String.format("%s_openCommodityScale", MOD_PREFIX));

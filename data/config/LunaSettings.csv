@@ -1,5 +1,8 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 
+secondwaveoptions_bookOfGrudgesHeader,Book of Grudges Header,Header,Book of Grudges,,,,,,
+secondwaveoptions_bookOfGrudgesEnable,Enable Book of Grudges,Boolean,TRUE,,[Enables the Book of Grudges feature.] Factions (and optionally people) will remember your slight.,,,
+
 secondwaveoptions_competentFoesHeader,Competent Foes Header,Header,Competent Foes,,,,,
 secondwaveoptions_autofitTweaksEnable,Enable Autofit Tweaks,Boolean,TRUE,,"[Enables the Autofit Tweaks feature.] Currently only adjusts autofit randomize probability. Possible additions later.",,,
 secondwaveoptions_blessedByLuddEnable,Enable Blessed By Ludd,Boolean,TRUE,,"[Enables the Blessed By Ludd feature.] Allows a proportion of Luddic Path fleets to not suffer from ill-advised modifications.",,,
@@ -14,15 +17,23 @@ secondwaveoptions_commodityScalingEnable,Enable Commodity Scaling,Boolean,TRUE,,
 secondwaveoptions_noFreeStorageEnable,Enable No Free Storage,Boolean,TRUE,,"[Enables the No Free Storage feature.] Removes the free storage capabilities of the three abandoned stations in the Core Worlds. Possible additions later.",,,
 secondwaveoptions_secureMarketsEnable,Enable Secure Markets,Boolean,TRUE,,"[Enables the Secure Markets feature.] Adds patrols, stations, defenses to starting markets. Tries to be sensible about placement. Affects [new games only], and obviously can't be undone.",,,
 
+secondwaveoptions_bookOfGrudges,Book of Grudges,Header,Book of Grudges,,,,,Book of Grudges
+secondwaveoptions_bogGrudgeMode,Grudgin' Mode,Radio,TRUE,"STANDARD, TRUE","[STANDARD]: after a sufficient intensity of grudges is achieved, the maximum rep level is reduced.
+[TRUE]: every grudge will reduce maximum reputation.",,,Book of Grudges
+secondwaveoptions_bogIncludePersons,Include Persons,Boolean,FALSE,,Makes [Book of Grudges] behavior apply to regular people as well as factions.,,,Book of Grudges
+secondwaveoptions_bogDuration,Grudge Duration,Int,365,,Grudge duration in [days]. Set to [-1] to make them permanent. Only applies to new grudges.,-1,1000,Book of Grudges
+
 secondwaveoptions_autofitTweaks,Autofit Tweaks,Header,Autofit Tweaks,,,,,Competent Foes
+secondwaveoptions_autofitTweaksText,Autofit Tweaks Text,Text,Currently only adjusts autofit randomize probability. Possible additions later.,,,,,Competent Foes
 secondwaveoptions_atAutofitRandomizeProbability,Autofit Randomize Probability,Double,0,,Sets the [autofit randomize probability] for all factions (including player) for slightly less insane autofits.,0,1,Competent Foes
-secondwaveoptions_blessedByLudd,Blessed By Ludd,Header,Blessed By Ludd,,,,,Competent Foes
+
+secondwaveoptions_CompetentFoes,Competent Foes,Header,Competent Foes,,,,,Competent Foes
+secondwaveoptions_CompetentFoesText,Competent Foes Text,Text,Chance to remove some handicaps applied to specific factions.,,,,,Competent Foes
 secondwaveoptions_bblChance,Blessing Chance,Double,1,,Chance for a given [Luddic Path] ship to not suffer from [Ill-Advised Modifications].,0,1,Competent Foes
-secondwaveoptions_makeSindriaGreatAgain,Make Sindria Great Again,Header,Make Sindria Great Again,,,,,Competent Foes
 secondwaveoptions_msgaChance,Escape Notice Chance (Sindrian Diktat),Double,1,,Chance for a given [Sindrian Diktat] ship to not suffer from [Special Modifications].,0,1,Competent Foes
 secondwaveoptions_mlggaChance,Escape Notice Chance (Lion's Guard),Double,1,,Chance for a given [Lion's Guard] ship to not suffer from [Special Modifications].,0,1,Competent Foes
 secondwaveoptions_pirateScholars,Pirate Scholars,Header,Pirate Scholars,,,,,Competent Foes
-secondwaveoptions_psLearningMode,Learning Mode,Radio,DYNAMIC,"MANUAL, DYNAMIC","Set the number of learning attempts yourself using the two options below, or use dynamic for it to automatically scale with the number of relevant mods",,,Competent Foes
+secondwaveoptions_psLearningMode,Learning Mode,Radio,DYNAMIC,"MANUAL, DYNAMIC","Set the number of learning attempts yourself using the two options below, or use [DYNAMIC] for it to automatically scale with the number of relevant mods",,,Competent Foes
 secondwaveoptions_psChance,Learning Chance,Double,0.37,,Chance for the Pirates to learn a new technology per attempt. [Only applies in MANUAL Learning Mode].,0,1,Competent Foes
 secondwaveoptions_psLearningAttemptsPerMonth,Learning Attempts Per Month,Int,3,,Number of learning attempts per month. [Only applies in MANUAL Learning Mode].,0,100,Competent Foes
 secondwaveoptions_psMonthsForBaseEffect,Months To Start Learning,Int,0,,Number of months that must elapse before pirates start learning.,0,100,Competent Foes
@@ -35,7 +46,7 @@ secondwaveoptions_dsFlatBasePoints,Flat Base Points,Double,600,,Flat bonus to th
 secondwaveoptions_dsFlatGrowthPoints,Flat Growth Points,Double,5,,Flat bonus to the monthly increase in score ([score growth]) of every faction.,0,100,Doctrine Scaling
 secondwaveoptions_dsNoMarketBaseMultiplier,No Market Base Multiplier,Double,3,,Multiplier to the [base score] of market-less factions.,0,10,Doctrine Scaling
 secondwaveoptions_dsNoMarketGrowthMultiplier,No Market Growth Multiplier,Double,6,,Multiplier to the [score growth] of market-less factions.,0,10,Doctrine Scaling
-secondwaveoptions_dsEliteFactionBonus,Elite Faction Multiplier,Double,0.125,,"Multiplicative increase to the [base score] and [score growth] for elite factions, scaled by elite-ness and determined by [doctrine.getTotalStrengthScore()-7]",0,1,Doctrine Scaling
+secondwaveoptions_dsEliteFactionBonus,Elite Faction Scaling,Double,0.125,,"Multiplicative increase to the [base score] and [score growth] for elite factions, scaled by elite-ness (determined by [doctrine.getTotalStrengthScore()-7]).",0,1,Doctrine Scaling
 secondwaveoptions_dsUseFactionBlacklist,Use Faction Blacklist,Boolean,FALSE,,Disables any factions listed in [/data/config/modSettings.json]. Requires [MagicLib].,,,Doctrine Scaling
 
 secondwaveoptions_doctrineScalingTimeHeader,Doctrine Time Scaling,Header,Time Scaling,,,,,Doctrine Scaling
@@ -81,7 +92,7 @@ secondwaveoptions_otherCommodityScale,Other Market Commodity Scale,Double,0.5,,A
 #secondwaveoptions_commodityVariationScale,Commodity Variation Scale,Double,0.2,,Adjusts [variation] in proportion of commodities found in markets.,0,1,Market Crackdowns
 
 secondwaveoptions_secureMarkets,Secure Markets,Header,Secure Markets,,,,,Market Crackdowns
-secondwaveoptions_secureMarketsText,Secure Markets Text,Text,"Returning feature! Adds patrols, stations, defenses to starting markets. Tries to be sensible about placement.",,,,,Market Crackdowns
+secondwaveoptions_secureMarketsText,Secure Markets Text,Text,"Returning feature! Adds patrols, stations, defenses, heavy industry to starting markets. Tries to be sensible about placement.",,,,,Market Crackdowns
 secondwaveoptions_secureMarketsAddPatrols,Add Patrols,Boolean,TRUE,,Adds Patrol HQs/Military Bases/High Commands to markets based on market size. Respects system owner and industry slots.,,,Market Crackdowns
 secondwaveoptions_smHighCommandSize,Size for High Command,Int,7,,"Minimum market size to add a [High Command] if possible. Only affects system owning faction. If industry slots are not available, a Patrol HQ is added instead. Supersedes options below.",0,10,Market Crackdowns
 secondwaveoptions_smMilitaryBaseSize,Size for Military Base,Int,6,,"Minimum market size to add a [Military Base] if possible. Only affects system owning faction. If industry slots are not available, a Patrol HQ is added instead. Supersedes option below.",0,10,Market Crackdowns
