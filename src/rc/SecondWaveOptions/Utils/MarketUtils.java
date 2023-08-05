@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import org.apache.log4j.Logger;
 import org.lwjgl.util.vector.Vector2f;
@@ -32,6 +33,10 @@ public class MarketUtils {
         Vector2f coreMax = Misc.getCoreMax();
         return (coreMin.x < locationInHyperspace.x && locationInHyperspace.x < coreMax.x
                 && coreMin.y < locationInHyperspace.y && locationInHyperspace.y < coreMax.y);
+    }
+
+    public static boolean isCoreTheme(SectorEntityToken token) {
+        return token.hasTag(Tags.THEME_CORE);
     }
 
     public static FactionAPI getSystemOwner(StarSystemAPI starSystem, boolean excludePlayerFaction) {

@@ -5,10 +5,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.HullMods;
-import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import lunalib.lunaSettings.LunaSettings;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,11 +16,11 @@ import rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener;
 import rc.SecondWaveOptions.DoctrineScaling.BookOfGrudgesListener;
 import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.CommodityScalingListener;
+import rc.SecondWaveOptions.MarketCrackdowns.NoFreeStorage;
 import rc.SecondWaveOptions.MarketCrackdowns.SecureMarkets;
 
 import static rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener.blessedByLuddKey;
 import static rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener.escapedNoticeKey;
-import static rc.SecondWaveOptions.Utils.MarketUtils.isInCore;
 
 //todo other plans: ai tweaks
 public class SecondWaveOptionsModPlugin extends BaseModPlugin {
@@ -36,6 +34,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             enableCommodityScaling, enableNoFreeStorage, enableSecureMarkets;
     public static String bogGrudgeMode;
     public static boolean bogIncludePersons;
+    public static float bogGrudgeFraction;
     public static int bogDuration;
     public static float
             atAutofitRandomizeProbability,
@@ -61,7 +60,6 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             dsBaseMarketSizePower, dsBaseSprawlPenaltyPower, dsGrowthMarketSizePower, dsGrowthSprawlPenaltyPower;
     public static boolean dsUseFactionBlacklist;
     public static int dsMonthForBaseEffect, dsLevelForBaseEffect, dsColonyForBaseEffect;
-    public String noFreeMarketsKey = String.format("$%s_%s", MOD_PREFIX, "noFreeStorage");//V is boolean
 
     @Override
     public void onApplicationLoad() {
@@ -144,12 +142,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             Global.getSector().addTransientListener(commodityScalingListener);
         }
         if (enableNoFreeStorage) {
-            for (SectorEntityToken token : Global.getSector().getEntitiesWithTag(Tags.STATION)) {
-                if (isInCore(token)) {
-                    token.addTag(noFreeMarketsKey);
-                    token.getMemoryWithoutUpdate().set(noFreeMarketsKey, true);
-                }
-            }
+            NoFreeStorage.disableFreeStorage();
         }
         /* it won't work aaaaaaaaaaaaaa
         if (false) {
@@ -184,10 +177,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             AutofitTweaks.restoreAutofitRandomizeProbability(faction);
         }
         // no free storage
-        for (SectorEntityToken token : Global.getSector().getEntitiesWithTag(noFreeMarketsKey)) {
-            token.removeTag(noFreeMarketsKey);
-            token.getMemoryWithoutUpdate().unset(noFreeMarketsKey);
-        }
+        NoFreeStorage.restoreFreeStorage();
     }
 
     @Override
@@ -217,18 +207,13 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
                 }
             }
         }
-        if (enableNoFreeStorage) {
-            for (SectorEntityToken token : Global.getSector().getEntitiesWithTag(Tags.STATION)) {
-                if (isInCore(token)) {
-                    token.addTag(noFreeMarketsKey);
-                    token.getMemoryWithoutUpdate().set(noFreeMarketsKey, true);
-                }
-            }
-        }
         if (enableDoctrineScaling) {
             for (FactionAPI faction : Global.getSector().getAllFactions()) {
                 if (DoctrineScalingListener.isValidFaction(faction)) DoctrineScalingListener.runAll(faction, false);
             }
+        }
+        if (enableNoFreeStorage) {
+            NoFreeStorage.disableFreeStorage();
         }
     }
 
@@ -237,6 +222,7 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         enableBookOfGrudges = LunaSettings.getBoolean(MOD_ID, String.format("%s_bookOfGrudgesEnable", MOD_PREFIX));
         bogGrudgeMode = LunaSettings.getString(MOD_ID, String.format("%s_bogGrudgeMode", MOD_PREFIX));
         bogIncludePersons = LunaSettings.getBoolean(MOD_ID, String.format("%s_bogIncludePersons", MOD_PREFIX));
+        bogGrudgeFraction = LunaSettings.getFloat(MOD_ID, String.format("%s_bogGrudgeFraction", MOD_PREFIX));
         bogDuration = LunaSettings.getInt(MOD_ID, String.format("%s_bogDuration", MOD_PREFIX));
         // // Competent Foes
         //autofit tweaks

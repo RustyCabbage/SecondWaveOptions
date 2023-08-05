@@ -37,38 +37,31 @@ public class BookOfGrudgesListener extends BaseCampaignEventListener {
         FactionAPI factionAPI = Global.getSector().getFaction(faction);
         if (delta < 0) {
             boolean noDuration = bogDuration == -1;
-            addGrudge(factionAPI, delta, noDuration, bogDuration);
+            addGrudge(factionAPI, delta, bogGrudgeFraction, noDuration, bogDuration);
         }
         float totalDelta = addRepFromGrudges(factionAPI);
         float maxRel = getMaxRep(totalDelta);
         RepLevel repLevel = getMaxRepLevel(totalDelta);
         GrudgeMode grudgeMode = GrudgeMode.valueOf(bogGrudgeMode);
+        boolean changedRep = false;
         switch (grudgeMode) {
             case STANDARD:
-                boolean changedRep = factionAPI.getRelToPlayer().ensureAtBest(repLevel);
-                if (changedRep) {
-                    Global.getSector().getCampaignUI().addMessage(
-                            String.format(notificationText, factionAPI.getDisplayNameWithArticle()
-                                    , repLevel.getDisplayName().toLowerCase()), Misc.getNegativeHighlightColor(),
-                            factionAPI.getDisplayNameWithArticle(),
-                            repLevel.getDisplayName().toLowerCase(),
-                            factionAPI.getColor(),
-                            Misc.getRelColor(maxRel));
-                }
+                changedRep = factionAPI.getRelToPlayer().ensureAtBest(repLevel);
                 break;
             case TRUE:
-                if (factionAPI.getRelToPlayer().getRel() > maxRel) {
-                    factionAPI.getRelToPlayer().setRel(maxRel);
-                    Global.getSector().getCampaignUI().addMessage(
-                            String.format(notificationText, factionAPI.getDisplayNameWithArticle()
-                                    , Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
-                            Misc.getNegativeHighlightColor(),
-                            factionAPI.getDisplayNameWithArticle(),
-                            String.format(notificationText2, Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
-                            factionAPI.getColor(),
-                            Misc.getRelColor(maxRel));
-                }
+                changedRep = factionAPI.getRelToPlayer().getRel() > maxRel;
+                if (changedRep) factionAPI.getRelToPlayer().setRel(maxRel);
                 break;
+        }
+        if (changedRep) {
+            Global.getSector().getCampaignUI().addMessage(
+                    String.format(notificationText, factionAPI.getDisplayNameWithArticle()
+                            , Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
+                    Misc.getNegativeHighlightColor(),
+                    factionAPI.getDisplayNameWithArticle(),
+                    repLevel.getDisplayName().toLowerCase(),
+                    factionAPI.getColor(),
+                    Misc.getRelColor(maxRel));
         }
     }
 
@@ -77,53 +70,47 @@ public class BookOfGrudgesListener extends BaseCampaignEventListener {
         if (!bogIncludePersons) return;
         if (delta < 0) {
             boolean noDuration = bogDuration == -1;
-            addGrudge(person, delta, noDuration, bogDuration);
+            addGrudge(person, delta, bogGrudgeFraction, noDuration, bogDuration);
         }
         float totalDelta = addRepFromGrudges(person);
         float maxRel = getMaxRep(totalDelta);
         RepLevel repLevel = getMaxRepLevel(totalDelta);
         GrudgeMode grudgeMode = GrudgeMode.valueOf(bogGrudgeMode);
+        boolean changedRep = false;
         switch (grudgeMode) {
             case STANDARD:
-                boolean changedRep = person.getRelToPlayer().ensureAtBest(repLevel);
-                if (changedRep) {
-                    Global.getSector().getCampaignUI().addMessage(
-                            String.format(notificationText, person.getNameString()
-                                    , repLevel.getDisplayName().toLowerCase()), Misc.getNegativeHighlightColor(),
-                            person.getNameString(),
-                            repLevel.getDisplayName().toLowerCase(),
-                            person.getFaction().getColor(),
-                            Misc.getRelColor(maxRel));
-                }
+                changedRep = person.getRelToPlayer().ensureAtBest(repLevel);
                 break;
             case TRUE:
-                if (person.getRelToPlayer().getRel() > maxRel) {
-                    person.getRelToPlayer().setRel(maxRel);
-                    Global.getSector().getCampaignUI().addMessage(
-                            String.format(notificationText, person.getNameString()
-                                    , Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
-                            Misc.getNegativeHighlightColor(),
-                            person.getNameString(),
-                            String.format(notificationText2, Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
-                            person.getFaction().getColor(),
-                            Misc.getRelColor(maxRel));
-                }
+                changedRep = person.getRelToPlayer().getRel() > maxRel;
+                if (changedRep) person.getRelToPlayer().setRel(maxRel);
                 break;
+        }
+        if (changedRep) {
+            Global.getSector().getCampaignUI().addMessage(
+                    String.format(notificationText, person.getNameString()
+                            , Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
+                    Misc.getNegativeHighlightColor(),
+                    person.getNameString(),
+                    String.format(notificationText2, Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
+                    person.getFaction().getColor(),
+                    Misc.getRelColor(maxRel));
         }
     }
 
-    public void addGrudge(Object object, float delta, boolean noDuration, float durationInDays) {
+    public void addGrudge(Object object, float delta, float grudgeFraction, boolean noDuration, float durationInDays) {
         if (object instanceof HasMemory) {
+            float grudgeDelta = delta * grudgeFraction;
             HasMemory objectWithMemory = (HasMemory) object;
             MemoryAPI memory = objectWithMemory.getMemoryWithoutUpdate();
             int nextGrudge = (memory.contains(nextGrudgeKey)) ? memory.getInt(nextGrudgeKey) + 1 : 1;
             if (noDuration) {
-                memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), delta);
+                memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), grudgeDelta);
             } else {
-                memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), delta, durationInDays);
+                memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), grudgeDelta, durationInDays);
             }
             memory.set(nextGrudgeKey, nextGrudge);
-            log.debug(String.format("Grudge %s: delta=%s", nextGrudge, delta));
+            log.debug(String.format("Grudge %s: delta=%s", nextGrudge, grudgeDelta));
         }
     }
 
@@ -155,6 +142,6 @@ public class BookOfGrudgesListener extends BaseCampaignEventListener {
         float maxRepAsFloat = 1f + delta;
         RepLevel maxRepLevel = RepLevel.getLevelFor(maxRepAsFloat);
         log.debug(String.format("Max reputation: %s, rep level %s", maxRepAsFloat, maxRepLevel));
-        return RepLevel.getLevelFor(maxRepAsFloat);
+        return maxRepLevel;
     }
 }

@@ -21,6 +21,7 @@ secondwaveoptions_bookOfGrudges,Book of Grudges,Header,Book of Grudges,,,,,Book 
 secondwaveoptions_bogGrudgeMode,Grudgin' Mode,Radio,TRUE,"STANDARD, TRUE","[STANDARD]: after a sufficient intensity of grudges is achieved, the maximum rep level is reduced.
 [TRUE]: every grudge will reduce maximum reputation.",,,Book of Grudges
 secondwaveoptions_bogIncludePersons,Include Persons,Boolean,FALSE,,Makes [Book of Grudges] behavior apply to regular people as well as factions.,,,Book of Grudges
+secondwaveoptions_bogGrudgeFraction,Grudge Fraction,Double,1,,Fraction of lost rep that is persistent.,0,1,Book of Grudges
 secondwaveoptions_bogDuration,Grudge Duration,Int,365,,Grudge duration in [days]. Set to [-1] to make them permanent. Only applies to new grudges.,-1,1000,Book of Grudges
 
 secondwaveoptions_autofitTweaks,Autofit Tweaks,Header,Autofit Tweaks,,,,,Competent Foes
@@ -51,19 +52,19 @@ secondwaveoptions_dsUseFactionBlacklist,Use Faction Blacklist,Boolean,FALSE,,Dis
 
 secondwaveoptions_doctrineScalingTimeHeader,Doctrine Time Scaling,Header,Time Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingTimeDesc,Doctrine Scaling Time Description,Text,"Factions scale over time in terms of months since March c206.",,,,,Doctrine Scaling
-secondwaveoptions_dsMonthForBaseEffect,Months For Base Time Effect,Int,12,,Number of months elapsed for [time] scaling to reach [zero].,0,100,Doctrine Scaling
+secondwaveoptions_dsMonthForBaseEffect,Months For Base Time Effect,Int,12,,Creates a negative scaling effect for more gradual doctrine scaling. Number of months elapsed for [time] scaling to reach [zero].,0,100,Doctrine Scaling
 secondwaveoptions_dsBaseScalingPerMonth,Base Scaling Per Month,Double,0.005,,Multiplicative increase in [base score] per month.,-0.02,0.02,Doctrine Scaling
 secondwaveoptions_dsGrowthScalingPerMonth,Growth Scaling Per Month,Double,0.0025,,Multiplicative increase in [score growth] per month.,-0.02,0.02,Doctrine Scaling
 
 secondwaveoptions_doctrineScalingLevelHeader,Doctrine Level Scaling,Header,Level Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingLevelDesc,Doctrine Scaling Level Description,Text,"Factions scale over player level.",,,,,Doctrine Scaling
-secondwaveoptions_dsLevelForBaseEffect,Levels For Base Level Effect,Int,5,,Level required for [level] scaling to reach [zero].,0,100,Doctrine Scaling
+secondwaveoptions_dsLevelForBaseEffect,Levels For Base Level Effect,Int,5,,Creates a negative scaling effect for more gradual doctrine scaling. Level required for [level] scaling to reach [zero].,0,100,Doctrine Scaling
 secondwaveoptions_dsBaseScalingPerLevel,Base Scaling Per Level,Double,0.1,,Multiplicative increase in [base score] per level.,-0.2,0.2,Doctrine Scaling
 secondwaveoptions_dsGrowthScalingPerLevel,Growth Scaling Per Level,Double,0.05,,Multiplicative increase in [score growth] per level.,-0.2,0.2,Doctrine Scaling
 
 secondwaveoptions_doctrineScalingColonyHeader,Doctrine Colony Scaling,Header,Colony Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingColonyDesc,Doctrine Scaling Colony Description,Text,"Factions scale over number of player colonies.",,,,,Doctrine Scaling
-secondwaveoptions_dsColonyForBaseEffect,Colonies For Base Colony Effect,Int,0,,Colonies required for [colony] scaling to reach [zero].,0,100,Doctrine Scaling
+secondwaveoptions_dsColonyForBaseEffect,Colonies For Base Colony Effect,Int,0,,Creates a negative scaling effect for more gradual doctrine scaling. Colonies required for [colony] scaling to reach [zero].,0,100,Doctrine Scaling
 secondwaveoptions_dsBaseScalingPerColony,Base Scaling Per Colony,Double,0.1,,Multiplicative increase in [base score] per colony.,-0.2,0.2,Doctrine Scaling
 secondwaveoptions_dsGrowthScalingPerColony,Growth Scaling Per Colony,Double,0.05,,Multiplicative increase in [score growth] per colony.,-0.2,0.2,Doctrine Scaling
 secondwaveoptions_dsColonyMultiplierForPirates,Colony Multiplier For Pirates,Double,2,,Colony scaling multiplier for [pirate] factions. Affects both [base score] and [score growth],0.2,5,Doctrine Scaling

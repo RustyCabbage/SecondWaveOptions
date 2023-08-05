@@ -1,3 +1,10 @@
+Version 1.2.1-rc1
+
+- Added a new LunaLib setting for Book of Grudges to set the fraction of lost rep that is persistent
+- Fixed a crash when using Standard mode for Book of Grudges
+- Possibly fixed a crash involving submarkets with null markets for CommodityScaling(?)
+- No Free Storage should no longer affect RAT's Abyss storage locations
+
 Version 1.2.0-rc1
 
 - New feature: Book of Grudges. Losing rep with factions (and optionally people) becomes semi-permanent

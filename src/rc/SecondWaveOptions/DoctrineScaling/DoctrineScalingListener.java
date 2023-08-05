@@ -207,10 +207,9 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
             , float baseScalingPerColony, float growthScalingPerColony) {
         int numColonies = Misc.getPlayerMarkets(false).size();
         int effectiveNumColonies = numColonies - coloniesForBaseEffect;
-        float total = effectiveNumColonies * baseScalingPerColony;
-        if (Misc.isPirateFaction(factionScoreData.faction)) total *= dsColonyMultiplierForPirates;
-        factionScoreData.base *= 1 + total;
-        factionScoreData.growth *= 1 + total;
+        if (Misc.isPirateFaction(factionScoreData.faction)) effectiveNumColonies *= dsColonyMultiplierForPirates;
+        factionScoreData.base *= 1 + (effectiveNumColonies * baseScalingPerColony);
+        factionScoreData.growth *= 1 + (effectiveNumColonies * growthScalingPerColony);
         log.debug(String.format("Faction score after colonies: %s", factionScoreData));
         return factionScoreData;
     }
@@ -289,6 +288,28 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
         log.debug(String.format("Saved doctrine stats %s", Arrays.toString(doctrineStats)));
     }
 
+    public static void restoreDoctrineStats(FactionAPI faction) {
+        int[] doctrineStats = (int[]) faction.getMemoryWithoutUpdate().get(savedDoctrineKey);
+        if (doctrineStats == null) {
+            log.debug(String.format("No saved doctrine stats found for %s", faction));
+            return;
+        }
+        for (DoctrineStat doctrineStat : DoctrineStat.values()) {
+            switch (doctrineStat) {
+                case OFFICER_QUALITY:
+                    faction.getDoctrine().setOfficerQuality(doctrineStats[doctrineStat.ordinal()]);
+                    break;
+                case SHIP_QUALITY:
+                    faction.getDoctrine().setShipQuality(doctrineStats[doctrineStat.ordinal()]);
+                    break;
+                case NUM_SHIPS:
+                    faction.getDoctrine().setNumShips(doctrineStats[doctrineStat.ordinal()]);
+                    break;
+            }
+        }
+        log.debug(String.format("Restored doctrine stats %s", Arrays.toString(doctrineStats)));
+    }
+
     public void saveDoctrineStats(FactionScoreData factionScoreData) {
         int[] doctrineStats = getFactionDoctrineStats(factionScoreData);
         factionScoreData.faction.getMemoryWithoutUpdate().set(savedDoctrineKey, doctrineStats);
@@ -315,28 +336,6 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
             }
         }
         log.info(String.format("Restored doctrine stats %s", Arrays.toString(doctrineStats)));
-    }
-
-    public static void restoreDoctrineStats(FactionAPI faction) {
-        int[] doctrineStats = (int[]) faction.getMemoryWithoutUpdate().get(savedDoctrineKey);
-        if (doctrineStats == null) {
-            log.debug(String.format("No saved doctrine stats found for %s", faction));
-            return;
-        }
-        for (DoctrineStat doctrineStat : DoctrineStat.values()) {
-            switch (doctrineStat) {
-                case OFFICER_QUALITY:
-                    faction.getDoctrine().setOfficerQuality(doctrineStats[doctrineStat.ordinal()]);
-                    break;
-                case SHIP_QUALITY:
-                    faction.getDoctrine().setShipQuality(doctrineStats[doctrineStat.ordinal()]);
-                    break;
-                case NUM_SHIPS:
-                    faction.getDoctrine().setNumShips(doctrineStats[doctrineStat.ordinal()]);
-                    break;
-            }
-        }
-        log.debug(String.format("Restored doctrine stats %s", Arrays.toString(doctrineStats)));
     }
 
     public static float getDoctrinePointCost(FactionScoreData factionScoreData, DoctrineStat doctrineStat

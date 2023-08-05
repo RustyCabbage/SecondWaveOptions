@@ -145,6 +145,10 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
      * @param commodityScale
      */
     public void initializeCommodityScale(SubmarketAPI submarket, float commodityScale) {
+        if (submarket == null || submarket.getMarket() == null) {
+            log.error("No market or submarket found");
+            return;
+        }
         log.debug(String.format("Initializing commodity scaling for %s at %s with commodityScale value %s"
                 , submarket.getSpecId(), submarket.getMarket().getId(), commodityScale));
         String submarketKey = String.format(KEY_submarketCommodityScale, submarket.getMarket().getId(), submarket.getSpecId());
