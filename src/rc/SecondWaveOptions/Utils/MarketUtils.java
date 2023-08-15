@@ -36,7 +36,7 @@ public class MarketUtils {
     }
 
     public static boolean isCoreTheme(SectorEntityToken token) {
-        return token.hasTag(Tags.THEME_CORE);
+        return token.getContainingLocation().hasTag(Tags.THEME_CORE);
     }
 
     public static FactionAPI getSystemOwner(StarSystemAPI starSystem, boolean excludePlayerFaction) {

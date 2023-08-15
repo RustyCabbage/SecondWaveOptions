@@ -1,3 +1,7 @@
+Version 1.2.1-rc2
+
+- Fixed No Free Storage not working
+
 Version 1.2.1-rc1
 
 - Added a new LunaLib setting for Book of Grudges to set the fraction of lost rep that is persistent
