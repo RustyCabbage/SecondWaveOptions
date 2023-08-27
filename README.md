@@ -18,8 +18,6 @@ if you give me cool, easily implemented ideas, they probably won't get added to 
    - you can turn everything off and have a mod that does nothing!!
 - **Should be safe to add and remove at any point**, which is very pog.
    - but i didn't mark it utility so don't blame me for anything ty
-- **If you download this mod, I will like you at least a little bit more than if you didn't**, and really, what could be more pog than that?
-   - *terms and conditions apply*
 
 # Links
 - Forum: outdated 

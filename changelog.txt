@@ -1,3 +1,14 @@
+Version 1.3.0
+
+- Added Doctrine Scaling Fleet Buffs: factions that scale past vanilla limits will now gain additional bonuses (commander skills, officers & officer levels, elite skills, s-mods)
+- Fixed an issue with Pirate Scholars when a mod adds a learnable ship with rarity 0
+- Fixed Doctrine Scaling not taking into account dsFlatBasePoints and dsFlatGrowthPoints from LunaSettings
+- Reduced multiplicative scaling of Doctrine Scaling elite multipliers
+- Fixed a crash that could occur trading in unique markets using Commodity Scaling
+- Fixed No Free Storage affecting more markets than expected
+- Adjusted the default values of some LunaSettings options
+- Added LunaSettings options for Doctrine Scaling Fleet Buffs under the Officer Buffs and Ship Buffs headings
+
 Version 1.2.1-rc2
 
 - Fixed No Free Storage not working

@@ -116,7 +116,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
         log.debug(picker.getTotal());
         /**/
         int numLearnableTechs = picker.getItems().size();
-        log.info(String.format("Learnable Techs: %s",numLearnableTechs));
+        log.info(String.format("Learnable Techs: %s", numLearnableTechs));
         for (int i = 0; i < numLearningAttempts && !picker.isEmpty(); i++) {
             float nextFloat = learningRandom.nextFloat();
             if (nextFloat < learningChance) {
@@ -129,7 +129,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                 //log.debug(String.format("Learning attempt %s: Failed to pick with %s > %s", i + 1, nextFloat, learningChance));
             }
         }
-        if (!picker.isEmpty()) log.info(String.format("Learned %s Techs.",numLearnableTechs-picker.getItems().size()));
+        if (!picker.isEmpty()) log.info(String.format("Learned %s Techs.", numLearnableTechs - picker.getItems().size()));
         faction.getMemoryWithoutUpdate().set(thingsLearnedKey, thingsLearned);
         //log.debug(thingsLearned);
         return thingsLearned;
@@ -189,12 +189,13 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
             if (spec.isDefaultDHull()
                     || spec.getHullSize() == ShipAPI.HullSize.FIGHTER
                     || !spec.hasHullName()
+                    || spec.getRarity() == 0f
                     || "shuttlepod".equals(spec.getHullId())
                     || !Collections.disjoint(spec.getTags(), DISALLOWED_TAGS)
                     || !Collections.disjoint(spec.getHints(), DISALLOWED_HINTS)) continue;
             String id = spec.getHullId();
             if (!faction.getKnownShips().contains(id)) {
-                float weight = 1f / Math.min(1, spec.getRarity());
+                float weight = MathUtils.clampValue(spec.getRarity(), 0.001f, 1f);
                 if (spec.hasTag(Items.TAG_RARE_BP)) weight *= 0.25f;
                 switch (spec.getHullSize()) {
                     case CAPITAL_SHIP:
@@ -232,7 +233,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
             }
             String id = spec.getWeaponId();
             if (!faction.getKnownWeapons().contains(id) && autofit) {
-                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.000001f, 1f);
+                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.001f, 1f);
                 switch (spec.getSize()) {
                     case LARGE:
                         weight *= 0.5f;
@@ -264,7 +265,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
             }
             String id = spec.getId();
             if (!faction.getKnownFighters().contains(id) && autofit) {
-                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.000001f, 1f);
+                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.001f, 1f);
                 if (spec.getOpCost(null) < 8 + 1) {
                     weight *= 1f;
                 } else if (spec.getOpCost(null) < 8 * 2 + 1)
@@ -290,7 +291,7 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
                     || Collections.disjoint(spec.getTags(), REQUIRED_TAGS)) continue;
             String id = spec.getId();
             if (!faction.getKnownHullMods().contains(id)) {
-                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.000001f, 1f);
+                float weight = 1f / Math.max(1, (spec.getTier() + 1)) * MathUtils.clampValue(spec.getRarity(), 0.001f, 1f);
                 picker.add(new Pair<>(id, LearnableType.HULLMOD), (float) Math.pow(weight, weightPower));
             }
         }
@@ -341,9 +342,10 @@ public class PirateScholarsListener extends BaseCampaignEventListener {
         } catch (JSONException | IOException e) {
             log.error("Failed to parse csv data", e);
         }
+        // idea is that as you add more mods that include stuff to learn, the number of things the pirates expect to learn increases
         int n = sources.size() + 2;
         float C0 = 1f / (7 + n * n);
-        float q = (float) Math.pow(C0, (float) 1 / (2 * n));
+        float q = (float) Math.pow(C0, 1f / (2 * n));
         float p = 1 - q;
         /*
         float E = n*p;

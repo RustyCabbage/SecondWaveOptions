@@ -1,4 +1,4 @@
-package rc.SecondWaveOptions.DoctrineScaling;
+package rc.SecondWaveOptions.CompetentFoes;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;

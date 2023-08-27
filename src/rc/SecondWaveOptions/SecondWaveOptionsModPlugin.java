@@ -11,9 +11,10 @@ import lunalib.lunaSettings.LunaSettings;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import rc.SecondWaveOptions.CompetentFoes.AutofitTweaks;
+import rc.SecondWaveOptions.CompetentFoes.BookOfGrudgesListener;
 import rc.SecondWaveOptions.CompetentFoes.PirateScholarsListener;
 import rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener;
-import rc.SecondWaveOptions.DoctrineScaling.BookOfGrudgesListener;
+import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingFleetBuffsOnInflation;
 import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.CommodityScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.NoFreeStorage;
@@ -57,6 +58,11 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             dsBaseScalingPerLevel, dsGrowthScalingPerLevel,
             dsBaseScalingPerColony, dsGrowthScalingPerColony, dsColonyMultiplierForPirates,
             dsBaseCostPerPoint, dsCostPerTotalPoints, dsCostPerAdditionalPoint, dsCostAboveVanilla,
+            dsFleetBuffsOfficerProb, dsFleetBuffsChainOfficerProb,
+            dsFleetBuffsLevelProb, dsFleetBuffsChainLevelProb,
+            dsFleetBuffsEliteProb, dsFleetBuffsChainEliteProb,
+            dsFleetBuffsCommanderProb, dsFleetBuffsChainCommanderProb,
+            dsFleetBuffsSModProb, dsFleetBuffsChainSModProb,
             dsBaseMarketSizePower, dsBaseSprawlPenaltyPower, dsGrowthMarketSizePower, dsGrowthSprawlPenaltyPower;
     public static boolean dsUseFactionBlacklist;
     public static int dsMonthForBaseEffect, dsLevelForBaseEffect, dsColonyForBaseEffect;
@@ -135,6 +141,10 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             for (FactionAPI faction : Global.getSector().getAllFactions()) {
                 if (DoctrineScalingListener.isValidFaction(faction)) DoctrineScalingListener.runAll(faction, false);
             }
+
+            DoctrineScalingFleetBuffsOnInflation doctrineScalingFleetBuffsV2 = new DoctrineScalingFleetBuffsOnInflation();
+            log.info("Adding " + doctrineScalingFleetBuffsV2.getClass().getName());
+            Global.getSector().getListenerManager().addListener(doctrineScalingFleetBuffsV2, true);
         }
         if (enableCommodityScaling) {
             CommodityScalingListener commodityScalingListener = new CommodityScalingListener();
@@ -265,6 +275,16 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         dsCostPerTotalPoints = LunaSettings.getFloat(MOD_ID, String.format("%s_dsCostPerTotalPoints", MOD_PREFIX));
         dsCostPerAdditionalPoint = LunaSettings.getFloat(MOD_ID, String.format("%s_dsCostPerAdditionalPoint", MOD_PREFIX));
         dsCostAboveVanilla = LunaSettings.getFloat(MOD_ID, String.format("%s_dsCostAboveVanilla", MOD_PREFIX));
+        dsFleetBuffsOfficerProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsOfficerProb", MOD_PREFIX));
+        dsFleetBuffsChainOfficerProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsChainOfficerProb", MOD_PREFIX));
+        dsFleetBuffsLevelProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsLevelProb", MOD_PREFIX));
+        dsFleetBuffsChainLevelProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsChainLevelProb", MOD_PREFIX));
+        dsFleetBuffsEliteProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsEliteProb", MOD_PREFIX));
+        dsFleetBuffsChainEliteProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsChainEliteProb", MOD_PREFIX));
+        dsFleetBuffsCommanderProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsCommanderProb", MOD_PREFIX));
+        dsFleetBuffsChainCommanderProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsChainCommanderProb", MOD_PREFIX));
+        dsFleetBuffsSModProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsSModProb", MOD_PREFIX));
+        dsFleetBuffsChainSModProb = LunaSettings.getFloat(MOD_ID, String.format("%s_dsFleetBuffsChainSModProb", MOD_PREFIX));
         dsBaseMarketSizePower = LunaSettings.getFloat(MOD_ID, String.format("%s_dsBaseMarketSizePower", MOD_PREFIX));
         dsBaseSprawlPenaltyPower = LunaSettings.getFloat(MOD_ID, String.format("%s_dsBaseSprawlPenaltyPower", MOD_PREFIX));
         dsGrowthMarketSizePower = LunaSettings.getFloat(MOD_ID, String.format("%s_dsGrowthMarketSizePower", MOD_PREFIX));

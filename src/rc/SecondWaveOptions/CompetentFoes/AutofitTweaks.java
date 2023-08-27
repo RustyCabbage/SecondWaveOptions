@@ -29,5 +29,4 @@ public class AutofitTweaks {
         float probability = faction.getMemoryWithoutUpdate().getFloat(savedARPKey);
         faction.getDoctrine().setAutofitRandomizeProbability(probability);
     }
-
 }

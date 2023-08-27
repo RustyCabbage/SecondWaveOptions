@@ -5,9 +5,9 @@
     "modVersion":
     {
         "major":1,
-        "minor":2,
-        "patch":1-rc2
+        "minor":3,
+        "patch":0
     },
-	"directDownloadURL":"https://github.com/RustyCabbage/SecondWaveOptions/releases/download/v1.2.1-rc2/SecondWaveOptions-v1.2.1-rc2.zip",
+	"directDownloadURL":"https://github.com/RustyCabbage/SecondWaveOptions/releases/download/v1.3.0/SecondWaveOptions-v1.3.0.zip",
     "changelogURL":"https://raw.githubusercontent.com/RustyCabbage/SecondWaveOptions/main/changelog.txt"
 }

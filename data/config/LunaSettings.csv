@@ -34,7 +34,7 @@ secondwaveoptions_bblChance,Blessing Chance,Double,1,,Chance for a given [Luddic
 secondwaveoptions_msgaChance,Escape Notice Chance (Sindrian Diktat),Double,1,,Chance for a given [Sindrian Diktat] ship to not suffer from [Special Modifications].,0,1,Competent Foes
 secondwaveoptions_mlggaChance,Escape Notice Chance (Lion's Guard),Double,1,,Chance for a given [Lion's Guard] ship to not suffer from [Special Modifications].,0,1,Competent Foes
 secondwaveoptions_pirateScholars,Pirate Scholars,Header,Pirate Scholars,,,,,Competent Foes
-secondwaveoptions_psLearningMode,Learning Mode,Radio,DYNAMIC,"MANUAL, DYNAMIC","Set the number of learning attempts yourself using the two options below, or use [DYNAMIC] for it to automatically scale with the number of relevant mods",,,Competent Foes
+secondwaveoptions_psLearningMode,Learning Mode,Radio,DYNAMIC,"MANUAL, DYNAMIC","Set the number of learning attempts yourself using the two options below, or use [DYNAMIC] for it to automatically scale with the number of relevant mods.",,,Competent Foes
 secondwaveoptions_psChance,Learning Chance,Double,0.37,,Chance for the Pirates to learn a new technology per attempt. [Only applies in MANUAL Learning Mode].,0,1,Competent Foes
 secondwaveoptions_psLearningAttemptsPerMonth,Learning Attempts Per Month,Int,3,,Number of learning attempts per month. [Only applies in MANUAL Learning Mode].,0,100,Competent Foes
 secondwaveoptions_psMonthsForBaseEffect,Months To Start Learning,Int,0,,Number of months that must elapse before pirates start learning.,0,100,Competent Foes
@@ -43,11 +43,11 @@ secondwaveoptions_psLearnHullMods,Learn Hull Mods,Boolean,FALSE,,Whether or not 
 
 secondwaveoptions_doctrineScaling,Doctrine Scaling,Header,Doctrine Scaling,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingText,Doctrine Scaling Text,Text,"Returning feature! Adds a scaling mechanic to enemy factions that reacts to the shifting sector state. Every faction has a base score and a monthly growth in score, progress from which are stored independently of the base score.",,,,,Doctrine Scaling
-secondwaveoptions_dsFlatBasePoints,Flat Base Points,Double,600,,Flat bonus to the [base score] of every faction.,0,10000,Doctrine Scaling
+secondwaveoptions_dsFlatBasePoints,Flat Base Points,Double,600,,Flat bonus to the [base score] of every faction.,0,50000,Doctrine Scaling
 secondwaveoptions_dsFlatGrowthPoints,Flat Growth Points,Double,5,,Flat bonus to the monthly increase in score ([score growth]) of every faction.,0,100,Doctrine Scaling
-secondwaveoptions_dsNoMarketBaseMultiplier,No Market Base Multiplier,Double,3,,Multiplier to the [base score] of market-less factions.,0,10,Doctrine Scaling
-secondwaveoptions_dsNoMarketGrowthMultiplier,No Market Growth Multiplier,Double,6,,Multiplier to the [score growth] of market-less factions.,0,10,Doctrine Scaling
-secondwaveoptions_dsEliteFactionBonus,Elite Faction Scaling,Double,0.125,,"Multiplicative increase to the [base score] and [score growth] for elite factions, scaled by elite-ness (determined by [doctrine.getTotalStrengthScore()-7]).",0,1,Doctrine Scaling
+secondwaveoptions_dsNoMarketBaseMultiplier,No Market Base Multiplier,Double,2,,Multiplier to the [base score] of market-less factions.,0,10,Doctrine Scaling
+secondwaveoptions_dsNoMarketGrowthMultiplier,No Market Growth Multiplier,Double,5,,Multiplier to the [score growth] of market-less factions.,0,10,Doctrine Scaling
+secondwaveoptions_dsEliteFactionBonus,Elite Faction Scaling,Double,0.1,,"Multiplicative increase to the [base score] and [score growth] for elite factions, scaled by elite-ness (determined by [doctrine.getTotalStrengthScore() - 7]).",0,1,Doctrine Scaling
 secondwaveoptions_dsUseFactionBlacklist,Use Faction Blacklist,Boolean,FALSE,,Disables any factions listed in [/data/config/modSettings.json]. Requires [MagicLib].,,,Doctrine Scaling
 
 secondwaveoptions_doctrineScalingTimeHeader,Doctrine Time Scaling,Header,Time Scaling,,,,,Doctrine Scaling
@@ -75,6 +75,22 @@ secondwaveoptions_dsBaseCostPerPoint,Base Cost Per Doctrine Point,Double,800,,[B
 secondwaveoptions_dsCostPerTotalPoints,Cost Per Point (Total),Double,100,,Cost per point for the sum of all doctrine stats' points.,0,1000,Doctrine Scaling
 secondwaveoptions_dsCostPerAdditionalPoint,Cost Per Point (Doctrine),Double,100,,Cost per point for the individual doctrine stat's points.,0,1000,Doctrine Scaling
 secondwaveoptions_dsCostAboveVanilla,Cost Per Point (Doctrine) Above Vanilla,Double,500,,Cost per point for individual doctrine state above [5]. Stacks with cost per point per doctrine.,0,2000,Doctrine Scaling
+
+secondwaveoptions_doctrineScalingOfficerBuffsHeader,Doctrine Scaling Officer Buffs,Header,Officer Buffs,,,,,Doctrine Scaling
+secondwaveoptions_doctrineScalingOfficerBuffsDesc,Doctrine Scaling Officer Buffs Description,Text,"Factions that have scaled their officer quality above the vanilla limit of [5] have a chance to add commander skills, officers, levels, elite skills to their ships.",,,,,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsOfficerProb,Base Add Officer Probability,Double,0.2,,"[Base probability] of an officer-less ship gaining an officer [per excess point]. This probability is scaled by factors such as civilian, flagship, hull size.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsChainOfficerProb,Chain Add Officer Probability,Double,0.5,,"[After each successful event], the probability of the next event is that of the previous one multiplied by this amount. This continues until failure, or all applicable options are exhausted.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsLevelProb,Base Level Officer Probability,Double,0.1,,"[Base probability] of each officer leveling [per excess point]. This probability is scaled by factors such as civilian, flagship, hull size.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsChainLevelProb,Chain Level Officer Probability,Double,0.5,,"[After each successful event], the probability of the next event is that of the previous one multiplied by this amount. This continues until failure, or all applicable options are exhausted.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsEliteProb,Base Elite Skill Probability,Double,0.1,,"[Base probability] of each officer gaining an elite skill [per excess point]. This probability is scaled by factors such as civilian, flagship, hull size.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsChainEliteProb,Chain Elite Skill Probability,Double,0.5,,"[After each successful event], the probability of the next event is that of the previous one multiplied by this amount. This continues until failure, or all applicable options are exhausted.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsCommanderProb,Base Commander Skill Probability,Double,0.1,,"[Base probability] of the fleet gaining a commander skill [per excess point]. This probability is scaled by factors such as commander level, fleet size.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsChainCommanderProb,Chain Commander Skill Probability,Double,0.25,,"[After each successful event], the probability of the next event is that of the previous one multiplied by this amount. This continues until failure, or all applicable options are exhausted.",0,1,Doctrine Scaling
+
+secondwaveoptions_doctrineScalingShipBuffsHeader,Doctrine Scaling Ship Buffs,Header,Ship Buffs,,,,,Doctrine Scaling
+secondwaveoptions_doctrineScalingShipBuffsDesc,Doctrine Scaling Ship Buffs Description,Text,"Factions that have scaled their ship quality above the vanilla limit of [5] have a chance to add s-mods to their ships.",,,,,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsSModProb,Base S-Mod Probability,Double,0.25,,"[Base probability] of a ship gaining an s-mod [per excess point]. This probability is scaled by factors such as civilian, flagship, hull size.",0,1,Doctrine Scaling
+secondwaveoptions_dsFleetBuffsChainSModProb,Chain S-Mod Probability,Double,0.5,,"[After each successful event], the probability of the next event is that of the previous one multiplied by this amount. This continues until failure, or all applicable options are exhausted.",0,1,Doctrine Scaling
 
 secondwaveoptions_doctrineScalingMechanics,Doctrine Scaling,Header,Effect of Markets,,,,,Doctrine Scaling
 secondwaveoptions_doctrineScalingMechanicsText,Doctrine Scaling Text,Text,"Factions scale based on their markets size, industries, stability, etc. The math is convoluted so you probably don't want to touch these settings.",,,,,Doctrine Scaling

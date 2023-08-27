@@ -189,6 +189,7 @@ public class CommodityScalingListener extends BaseCampaignEventListener {
         HashMap<String, Integer> commodityMap = (HashMap<String, Integer>) submarket.getMarket().getMemoryWithoutUpdate().get(submarketKey);
         log.debug(commodityMap);
         for (String commodityId : Global.getSector().getEconomy().getAllCommodityIds()) {
+            if (!commodityMap.containsKey(commodityId)) continue;
             int savedCommodityAmount = commodityMap.get(commodityId);
             float commodityAmountDiff = submarket.getCargo().getCommodityQuantity(commodityId) - savedCommodityAmount;
             if (commodityAmountDiff > 0) {

@@ -107,7 +107,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
         if (!faction.getMemoryWithoutUpdate().contains(savedDoctrineKey)) saveDoctrineStats(faction);
         // todo should i make all of these return a copy? idk seems like a lot of work
         try {
-            FactionScoreData factionScoreData = getFactionScoreData(faction, 600, 5);
+            FactionScoreData factionScoreData = getFactionScoreData(faction, dsFlatBasePoints, dsFlatGrowthPoints);
             restoreDoctrineStats(factionScoreData.faction);
             if (Misc.getFactionMarkets(faction).isEmpty()) {
                 scaleFactionScoreNoMarket(factionScoreData, dsNoMarketBaseMultiplier, dsNoMarketGrowthMultiplier);
@@ -141,7 +141,7 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
     public static float getFactionScoreFromMarkets(FactionAPI faction, MarketUtils.MarketScoreType marketScoreType
             , float marketSizePower, float sprawlPenaltyPower) {
         List<MarketAPI> sortedFactionMarkets = MarketUtils.getSortedFactionMarkets(faction, marketScoreType, marketSizePower);
-        float eliteMultiplier = 1 + dsEliteFactionBonus * Math.max(0, faction.getDoctrine().getTotalStrengthPoints() - 7);
+        float eliteMultiplier = 1f + dsEliteFactionBonus * Math.max(0f, faction.getDoctrine().getTotalStrengthPoints() - 7);
         float factionScore = 0;
         float marketScore = 0;
         for (int i = 0; i < sortedFactionMarkets.size(); i++) {
@@ -176,9 +176,9 @@ public class DoctrineScalingListener extends BaseCampaignEventListener {
     }
 
     public static FactionScoreData scaleFactionScoreNoMarket(FactionScoreData factionScoreData, float baseMultiplier, float growthMultiplier) {
-        float eliteMultiplier = 1 + dsEliteFactionBonus * Math.max(0, factionScoreData.faction.getDoctrine().getTotalStrengthPoints() - 7);
-        factionScoreData.base *= baseMultiplier * eliteMultiplier;
-        factionScoreData.growth *= growthMultiplier * eliteMultiplier;
+        float eliteMultiplier = 1f + dsEliteFactionBonus * Math.max(0f, factionScoreData.faction.getDoctrine().getTotalStrengthPoints() - 7);
+        factionScoreData.base *= baseMultiplier + (eliteMultiplier-1);
+        factionScoreData.growth *= growthMultiplier + (eliteMultiplier-1);
         return factionScoreData;
     }
 
