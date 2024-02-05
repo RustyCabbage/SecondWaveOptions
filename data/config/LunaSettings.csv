@@ -1,10 +1,10 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 
-secondwaveoptions_bookOfGrudgesHeader,Book of Grudges Header,Header,Book of Grudges,,,,,,
-secondwaveoptions_bookOfGrudgesEnable,Enable Book of Grudges,Boolean,TRUE,,[Enables the Book of Grudges feature.] Factions (and optionally people) will remember your slight.,,,
+#secondwaveoptions_bookOfGrudgesHeader,Book of Grudges Header,Header,Book of Grudges,,,,,,
 
 secondwaveoptions_competentFoesHeader,Competent Foes Header,Header,Competent Foes,,,,,
 secondwaveoptions_autofitTweaksEnable,Enable Autofit Tweaks,Boolean,TRUE,,"[Enables the Autofit Tweaks feature.] Currently only adjusts autofit randomize probability. Possible additions later.",,,
+secondwaveoptions_bookOfGrudgesEnable,Enable Book of Grudges,Boolean,TRUE,,[Enables the Book of Grudges feature.] Factions (and optionally people) will remember your slights and be less trusting of you in the future.,,,
 secondwaveoptions_blessedByLuddEnable,Enable Blessed By Ludd,Boolean,TRUE,,"[Enables the Blessed By Ludd feature.] Allows a proportion of Luddic Path fleets to not suffer from ill-advised modifications.",,,
 secondwaveoptions_makeSindriaGreatAgainEnable,Enable Make Sindria Great Again,Boolean,TRUE,,"[Enables the Make Sindria Great Again feature.] Allows a proportion of Sindrian Diktat and Lion's Guard fleets to not suffer from special modifications.",,,
 secondwaveoptions_pirateScholarsEnable,Enable Pirate Scholars,Boolean,TRUE,,"[Enables the Pirate Scholars feature.] Every month, gives pirates a chance to learn new technologies. Will possibly make more modular in the future.",,,
@@ -15,24 +15,26 @@ secondwaveoptions_doctrineScalingEnable,Enable Doctrine Scaling,Boolean,TRUE,,[E
 secondwaveoptions_marketCrackdownsHeader,Market Crackdowns Header,Header,Market Crackdowns,,,,,
 secondwaveoptions_commodityScalingEnable,Enable Commodity Scaling,Boolean,TRUE,,"[Enables the Commodity Scaling feature.] Adjusts the proportion of commodities found in markets, including supplies, crew and fuel.",,,
 secondwaveoptions_noFreeStorageEnable,Enable No Free Storage,Boolean,TRUE,,"[Enables the No Free Storage feature.] Removes the free storage capabilities of the three abandoned stations in the Core Worlds. Possible additions later.",,,
+secondwaveoptions_protectionismEnable,Enable Protectionism,Boolean,TRUE,,"[Enables the Protectionism feature.] Increases tariffs in non-black submarkets as the player develops more/better markets/industries.",,,
 secondwaveoptions_secureMarketsEnable,Enable Secure Markets,Boolean,TRUE,,"[Enables the Secure Markets feature.] Adds patrols, stations, defenses to starting markets. Tries to be sensible about placement. Affects [new games only], and obviously can't be undone.",,,
-
-secondwaveoptions_bookOfGrudges,Book of Grudges,Header,Book of Grudges,,,,,Book of Grudges
-secondwaveoptions_bogGrudgeMode,Grudgin' Mode,Radio,TRUE,"STANDARD, TRUE","[STANDARD]: after a sufficient intensity of grudges is achieved, the maximum rep level is reduced.
-[TRUE]: every grudge will reduce maximum reputation.",,,Book of Grudges
-secondwaveoptions_bogIncludePersons,Include Persons,Boolean,FALSE,,Makes [Book of Grudges] behavior apply to regular people as well as factions.,,,Book of Grudges
-secondwaveoptions_bogGrudgeFraction,Grudge Fraction,Double,1,,Fraction of lost rep that is persistent.,0,1,Book of Grudges
-secondwaveoptions_bogDuration,Grudge Duration,Int,365,,Grudge duration in [days]. Set to [-1] to make them permanent. Only applies to new grudges.,-1,1000,Book of Grudges
 
 secondwaveoptions_autofitTweaks,Autofit Tweaks,Header,Autofit Tweaks,,,,,Competent Foes
 secondwaveoptions_autofitTweaksText,Autofit Tweaks Text,Text,Currently only adjusts autofit randomize probability. Possible additions later.,,,,,Competent Foes
 secondwaveoptions_atAutofitRandomizeProbability,Autofit Randomize Probability,Double,0,,Sets the [autofit randomize probability] for all factions (including player) for slightly less insane autofits.,0,1,Competent Foes
+
+secondwaveoptions_bookOfGrudges,Book of Grudges,Header,Book of Grudges,,,,,Competent Foes
+secondwaveoptions_bogGrudgeMode,Grudgin' Mode,Radio,TRUE,"STANDARD, TRUE","[STANDARD]: after a sufficient intensity of grudges is achieved, the maximum rep level is reduced.
+[TRUE]: every grudge will reduce maximum reputation.",,,Competent Foes
+secondwaveoptions_bogIncludePersons,Include Persons,Boolean,FALSE,,Makes [Book of Grudges] behavior apply to regular people as well as factions.,,,Competent Foes
+secondwaveoptions_bogGrudgeFraction,Grudge Fraction,Double,1,,Fraction of lost rep that is persistent.,0,1,Competent Foes
+secondwaveoptions_bogDuration,Grudge Duration,Int,365,,Grudge duration in [days]. Set to [-1] to make them permanent. Only applies to new grudges.,-1,1000,Competent Foes
 
 secondwaveoptions_CompetentFoes,Competent Foes,Header,Competent Foes,,,,,Competent Foes
 secondwaveoptions_CompetentFoesText,Competent Foes Text,Text,Chance to remove some handicaps applied to specific factions.,,,,,Competent Foes
 secondwaveoptions_bblChance,Blessing Chance,Double,1,,Chance for a given [Luddic Path] ship to not suffer from [Ill-Advised Modifications].,0,1,Competent Foes
 secondwaveoptions_msgaChance,Escape Notice Chance (Sindrian Diktat),Double,1,,Chance for a given [Sindrian Diktat] ship to not suffer from [Special Modifications].,0,1,Competent Foes
 secondwaveoptions_mlggaChance,Escape Notice Chance (Lion's Guard),Double,1,,Chance for a given [Lion's Guard] ship to not suffer from [Special Modifications].,0,1,Competent Foes
+
 secondwaveoptions_pirateScholars,Pirate Scholars,Header,Pirate Scholars,,,,,Competent Foes
 secondwaveoptions_psLearningMode,Learning Mode,Radio,DYNAMIC,"MANUAL, DYNAMIC","Set the number of learning attempts yourself using the two options below, or use [DYNAMIC] for it to automatically scale with the number of relevant mods.",,,Competent Foes
 secondwaveoptions_psChance,Learning Chance,Double,0.37,,Chance for the Pirates to learn a new technology per attempt. [Only applies in MANUAL Learning Mode].,0,1,Competent Foes
@@ -107,6 +109,16 @@ secondwaveoptions_militaryCommodityScale,Military Market Commodity Scale,Double,
 secondwaveoptions_lrCommodityScale,Local Resource Market Commodity Scale,Double,0.1,,Adjusts proportion of commodities found in [Local Resource] Submarkets.,0,1,Market Crackdowns
 secondwaveoptions_otherCommodityScale,Other Market Commodity Scale,Double,0.5,,Adjusts proportion of commodities found in [other] Submarkets.,0,1,Market Crackdowns
 #secondwaveoptions_commodityVariationScale,Commodity Variation Scale,Double,0.2,,Adjusts [variation] in proportion of commodities found in markets.,0,1,Market Crackdowns
+
+secondwaveoptions_protectionism,Protectionism,Header,Protectionism,,,,,Market Crackdowns
+secondwaveoptions_protectionismText,Protectionism Text,Text,"Increases tariffs in non-black submarkets as the player develops more/better markets/industries.",,,,,Market Crackdowns
+secondwaveoptions_protectionismMaxTariff,Max Tariff Rate,Double,65,,The highest amount tariffs can be raised to.,0,100,Market Crackdowns
+secondwaveoptions_protectionismTariffImpact,Tariff Impact,Double,4,,"[Increase in tariff (percentage)] per ""maxed out"" colony, before other multipliers.",0,100,Market Crackdowns
+secondwaveoptions_protectionismNumColoniesPower,Num Colonies Power,Double,0.5f,,[Scaling factor] of tariffs as a function of [number of player colonies] participating in the economy.,0,2,Market Crackdowns
+secondwaveoptions_protectionismCommissionFactionMult,Commission Faction Mult,Double,0.5,,[Multiplier] to [increase] in tariffs for commissioning faction.,0,1,Market Crackdowns
+secondwaveoptions_protectionismPirateFactionMult,Pirate Faction Mult,Double,0.7,,[Multiplier] to [increase] in tariffs for commissioning faction.,0,1,Market Crackdowns
+secondwaveoptions_protectionismDecentralizedFactionMult,Decentralized Faction Mult,Double,0.7,,[Multiplier] to increase in tariffs for commissioning faction.,0,1,Market Crackdowns
+
 
 secondwaveoptions_secureMarkets,Secure Markets,Header,Secure Markets,,,,,Market Crackdowns
 secondwaveoptions_secureMarketsText,Secure Markets Text,Text,"Returning feature! Adds patrols, stations, defenses, heavy industry to starting markets. Tries to be sensible about placement.",,,,,Market Crackdowns

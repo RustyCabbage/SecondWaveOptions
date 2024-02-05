@@ -19,4 +19,12 @@ public class MathUtils {
         if (value > max) return max;
         return value;
     }
+
+    public static float roundtoNDecimals(float value, float n) {
+        return (float) (Math.round(value * Math.pow(10, n)) / Math.pow(10, n));
+    }
+
+    public static float roundToTwoDecimals(float value) {
+        return roundtoNDecimals(value, 2);
+    }
 }

@@ -1,0 +1,5 @@
+{
+    "plugins":{
+        "secondwaveoptions_BlindSight":"rc.SecondWaveOptions.BattleMutations.BlindSightCombatPlugin"
+    }
+}

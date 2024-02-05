@@ -4,7 +4,7 @@
   # and https: //starsector.fandom.com/wiki/Category:Modding#Mods_inter-compatibility_and_integration
   "RustyCabbage_SecondWaveOptions": {
     "dsFactionBlacklist": [ # put faction ids here
-      # "remnants",
+      # "remnant",
     ],
   }
 }

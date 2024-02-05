@@ -13,6 +13,7 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.events.OfficerManagerEvent;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
+import com.fs.starfarer.api.loading.VariantSource;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.apache.log4j.Logger;
 import rc.SecondWaveOptions.SecondWaveOptionsModPlugin;
@@ -73,6 +74,10 @@ public class DoctrineScalingFleetBuffsOnInflation implements FleetInflationListe
                         , fleet.getNameWithFactionKeepCase(), fleet.getLocation()));
                 for (FleetMemberAPI member : fleet.getFleetData().getMembersInPriorityOrder()) {
                     if (member.isFighterWing() || member.isStation()) continue;
+
+                    ShipVariantAPI variant = member.getVariant().clone();
+                    variant.setSource(VariantSource.REFIT);
+
                     float sModProbability = getSModProbability(doctrine, member, dsFleetBuffsSModProb);
                     WeightedRandomPicker<String> sModdableMods = buildSModPicker(member, HullModType.ALL);
                     Random random = new Random();
@@ -82,9 +87,9 @@ public class DoctrineScalingFleetBuffsOnInflation implements FleetInflationListe
                         if (stop) break;
                         String toSMod = sModdableMods.pickAndRemove();
                         if (member.getHullSpec().getBuiltInMods().contains(toSMod)) {
-                            member.getVariant().getSModdedBuiltIns().add(toSMod);
+                            variant.getSModdedBuiltIns().add(toSMod);
                         } else {
-                            member.getVariant().addPermaMod(toSMod, true);
+                            variant.addPermaMod(toSMod, true);
                         }
                         refit = true;
                         log.debug(String.format("\t Added %s as an s-mod for %s of class %s"
@@ -92,8 +97,9 @@ public class DoctrineScalingFleetBuffsOnInflation implements FleetInflationListe
                         sModProbability *= dsFleetBuffsChainSModProb;
                     }
                     if (refit) {
-                        spendUnusedOP(member);
+                        spendUnusedOP(member, variant);
                     }
+                    member.setVariant(variant, false, true);
                 }
                 log.debug("----------------------------------------------------");
             }
@@ -236,8 +242,8 @@ public class DoctrineScalingFleetBuffsOnInflation implements FleetInflationListe
      *
      * @param member
      */
-    public void spendUnusedOP(FleetMemberAPI member) {
-        ShipVariantAPI variant = member.getVariant();
+    public void spendUnusedOP(FleetMemberAPI member, ShipVariantAPI variant) {
+        if (variant == null) variant = member.getVariant();
         MutableCharacterStatsAPI stats = (member.getFleetCommanderForStats() != null) ? member.getFleetCommanderForStats().getFleetCommanderStats() : null;
         int maxVents = getMaxVents(variant.getHullSize(), stats);
         int maxCaps = getMaxCaps(variant.getHullSize(), stats);

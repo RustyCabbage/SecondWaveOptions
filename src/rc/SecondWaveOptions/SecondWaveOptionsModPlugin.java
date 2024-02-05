@@ -18,6 +18,7 @@ import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingFleetBuffsOnInflation
 import rc.SecondWaveOptions.DoctrineScaling.DoctrineScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.CommodityScalingListener;
 import rc.SecondWaveOptions.MarketCrackdowns.NoFreeStorage;
+import rc.SecondWaveOptions.MarketCrackdowns.ProtectionismListener;
 import rc.SecondWaveOptions.MarketCrackdowns.SecureMarkets;
 
 import static rc.SecondWaveOptions.CompetentFoes.SuppressBadThingsListener.blessedByLuddKey;
@@ -29,29 +30,17 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
     public static String MOD_PREFIX = "secondwaveoptions";
     Logger log = Global.getLogger(SecondWaveOptionsModPlugin.class);
     public static boolean
-            enableBookOfGrudges,
-            enableAutofitTweaks, enableBlessedByLudd, enableMakeSindriaGreatAgain, enablePirateScholars,
+            enableAutofitTweaks, enableBookOfGrudges, enableBlessedByLudd, enableMakeSindriaGreatAgain, enablePirateScholars,
             enableDoctrineScaling,
-            enableCommodityScaling, enableNoFreeStorage, enableSecureMarkets;
-    public static String bogGrudgeMode;
-    public static boolean bogIncludePersons;
-    public static float bogGrudgeFraction;
-    public static int bogDuration;
+            enableCommodityScaling, enableNoFreeStorage, enableProtectionism, enableSecureMarkets;
+    public static String bogGrudgeMode, psLearningMode;
+    public static boolean bogIncludePersons, psLearnHullMods;
     public static float
-            atAutofitRandomizeProbability,
+            atAutofitRandomizeProbability, bogGrudgeFraction,
             bblChance, msgaChance, mlggaChance,
             psChance, psWeightPower;
-    public static String psLearningMode;
-    public static boolean psLearnHullMods;
-    public static int psLearningAttemptsPerMonth, psMonthsForBaseEffect;
-    public static float openCommodityScale, blackCommodityScale, militaryCommodityScale, lrCommodityScale, otherCommodityScale;
-    //commodityVariationScale;
-    public static boolean secureMarketsAddPatrols, secureMarketsAddStations, secureMarketsAddDefenses, secureMarketsAddHeavyInd;
-    public static int
-            secureMarketsHighCommandSize, secureMarketsMilitaryBaseSize, secureMarketsPatrolHQSize,
-            secureMarketsStarFortressSize, secureMarketsBattlestationSize, secureMarketsOrbitalStationSize,
-            secureMarketsHeavyBatteriesSize, secureMarketsGroundDefensesSize,
-            secureMarketsOrbitalWorksSize, secureMarketsHeavyIndustrySize;
+    public static int bogDuration, psLearningAttemptsPerMonth, psMonthsForBaseEffect;
+
     public static float
             dsFlatBasePoints, dsFlatGrowthPoints, dsNoMarketBaseMultiplier, dsNoMarketGrowthMultiplier, dsEliteFactionBonus,
             dsBaseScalingPerMonth, dsGrowthScalingPerMonth,
@@ -66,6 +55,18 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
             dsBaseMarketSizePower, dsBaseSprawlPenaltyPower, dsGrowthMarketSizePower, dsGrowthSprawlPenaltyPower;
     public static boolean dsUseFactionBlacklist;
     public static int dsMonthForBaseEffect, dsLevelForBaseEffect, dsColonyForBaseEffect;
+
+    public static float
+            openCommodityScale, blackCommodityScale, militaryCommodityScale, lrCommodityScale, otherCommodityScale, //commodityVariationScale
+            protectionismMaxTariff, protectionismTariffImpact, protectionismNumColoniesPower,
+            protectionismCommissionFactionMult, protectionismPirateFactionMult, protectionismDecentralizedFactionMult;
+    public static boolean secureMarketsAddPatrols, secureMarketsAddStations, secureMarketsAddDefenses, secureMarketsAddHeavyInd;
+    public static int
+            secureMarketsHighCommandSize, secureMarketsMilitaryBaseSize, secureMarketsPatrolHQSize,
+            secureMarketsStarFortressSize, secureMarketsBattlestationSize, secureMarketsOrbitalStationSize,
+            secureMarketsHeavyBatteriesSize, secureMarketsGroundDefensesSize,
+            secureMarketsOrbitalWorksSize, secureMarketsHeavyIndustrySize;
+
 
     @Override
     public void onApplicationLoad() {
@@ -112,16 +113,16 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         log.info("Reloading LunaLib settings");
         loadLunaLibSettings();
 
-        if (enableBookOfGrudges) {
-            BookOfGrudgesListener bookOfGrudgesListener = new BookOfGrudgesListener();
-            log.info("Adding " + bookOfGrudgesListener.getClass().getName());
-            Global.getSector().addTransientListener(bookOfGrudgesListener);
-        }
         if (enableAutofitTweaks) {
             for (FactionAPI faction : Global.getSector().getAllFactions()) {
                 AutofitTweaks.saveAutofitRandomizeProbability(faction);
                 AutofitTweaks.updateAutofitRandomizeProbability(faction, atAutofitRandomizeProbability);
             }
+        }
+        if (enableBookOfGrudges) {
+            BookOfGrudgesListener bookOfGrudgesListener = new BookOfGrudgesListener();
+            log.info("Adding " + bookOfGrudgesListener.getClass().getName());
+            Global.getSector().addTransientListener(bookOfGrudgesListener);
         }
         if (enableBlessedByLudd || enableMakeSindriaGreatAgain) {
             SuppressBadThingsListener suppressBadThingsListener = new SuppressBadThingsListener();
@@ -153,6 +154,11 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         }
         if (enableNoFreeStorage) {
             NoFreeStorage.disableFreeStorage();
+        }
+        if (enableProtectionism) {
+            ProtectionismListener protectionismListener = new ProtectionismListener();
+            log.info("Adding " + protectionismListener.getClass().getName());
+            Global.getSector().addTransientListener(protectionismListener);
         }
         /* it won't work aaaaaaaaaaaaaa
         if (false) {
@@ -301,6 +307,14 @@ public class SecondWaveOptionsModPlugin extends BaseModPlugin {
         //commodityVariationScale = LunaSettings.getFloat(MOD_ID, String.format("%s_commodityVariationScale", MOD_PREFIX));
         //no free storage
         enableNoFreeStorage = LunaSettings.getBoolean(MOD_ID, String.format("%s_noFreeStorageEnable", MOD_PREFIX));
+        //protectionism
+        enableProtectionism = LunaSettings.getBoolean(MOD_ID, String.format("%s_protectionismEnable", MOD_PREFIX));
+        protectionismMaxTariff = LunaSettings.getFloat(MOD_ID, String.format("%s_protectionismMaxTariff", MOD_PREFIX));
+        protectionismTariffImpact = LunaSettings.getFloat(MOD_ID, String.format("%s_protectionismTariffImpact", MOD_PREFIX));
+        protectionismNumColoniesPower = LunaSettings.getFloat(MOD_ID, String.format("%s_protectionismNumColoniesPower", MOD_PREFIX));
+        protectionismCommissionFactionMult = LunaSettings.getFloat(MOD_ID, String.format("%s_protectionismCommissionFactionMult", MOD_PREFIX));
+        protectionismPirateFactionMult = LunaSettings.getFloat(MOD_ID, String.format("%s_protectionismPirateFactionMult", MOD_PREFIX));
+        protectionismDecentralizedFactionMult = LunaSettings.getFloat(MOD_ID, String.format("%s_protectionismDecentralizedFactionMult", MOD_PREFIX));
         //secure markets
         enableSecureMarkets = LunaSettings.getBoolean(MOD_ID, String.format("%s_secureMarketsEnable", MOD_PREFIX));
         secureMarketsAddPatrols = LunaSettings.getBoolean(MOD_ID, String.format("%s_secureMarketsAddPatrols", MOD_PREFIX));
