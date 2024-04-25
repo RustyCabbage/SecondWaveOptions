@@ -68,15 +68,16 @@ public class BookOfGrudgesListener extends BaseCampaignEventListener {
     @Override
     public void reportPlayerReputationChange(final PersonAPI person, final float delta) {
         if (!bogIncludePersons) return;
-        if (delta < 0) {
-            boolean noDuration = bogDuration == -1;
-            addGrudge(person, delta, bogGrudgeFraction, noDuration, bogDuration);
-        }
+        if (delta >= 0) return;
+
+        boolean noDuration = bogDuration == -1;
+        addGrudge(person, delta, bogGrudgeFraction, noDuration, bogDuration);
         float totalDelta = addRepFromGrudges(person);
         float maxRel = getMaxRep(totalDelta);
         RepLevel repLevel = getMaxRepLevel(totalDelta);
         GrudgeMode grudgeMode = GrudgeMode.valueOf(bogGrudgeMode);
         boolean changedRep = false;
+
         switch (grudgeMode) {
             case STANDARD:
                 changedRep = person.getRelToPlayer().ensureAtBest(repLevel);
@@ -86,48 +87,50 @@ public class BookOfGrudgesListener extends BaseCampaignEventListener {
                 if (changedRep) person.getRelToPlayer().setRel(maxRel);
                 break;
         }
-        if (changedRep) {
-            Global.getSector().getCampaignUI().addMessage(
-                    String.format(notificationText, person.getNameString()
-                            , Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
-                    Misc.getNegativeHighlightColor(),
-                    person.getNameString(),
-                    String.format(notificationText2, Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
-                    person.getFaction().getColor(),
-                    Misc.getRelColor(maxRel));
-        }
+
+        if (!changedRep) return;
+
+        Global.getSector().getCampaignUI().addMessage(
+                String.format(notificationText, person.getNameString()
+                        , Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
+                Misc.getNegativeHighlightColor(),
+                person.getNameString(),
+                String.format(notificationText2, Misc.getRoundedValue(maxRel * 100), repLevel.getDisplayName().toLowerCase()),
+                person.getFaction().getColor(),
+                Misc.getRelColor(maxRel));
     }
 
     public void addGrudge(Object object, float delta, float grudgeFraction, boolean noDuration, float durationInDays) {
-        if (object instanceof HasMemory) {
-            float grudgeDelta = delta * grudgeFraction;
-            HasMemory objectWithMemory = (HasMemory) object;
-            MemoryAPI memory = objectWithMemory.getMemoryWithoutUpdate();
-            int nextGrudge = (memory.contains(nextGrudgeKey)) ? memory.getInt(nextGrudgeKey) + 1 : 1;
-            if (noDuration) {
-                memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), grudgeDelta);
-            } else {
-                memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), grudgeDelta, durationInDays);
-            }
-            memory.set(nextGrudgeKey, nextGrudge);
-            log.debug(String.format("Grudge %s: delta=%s", nextGrudge, grudgeDelta));
+        if (!(object instanceof HasMemory)) return;
+
+        float grudgeDelta = delta * grudgeFraction;
+        HasMemory objectWithMemory = (HasMemory) object;
+        MemoryAPI memory = objectWithMemory.getMemoryWithoutUpdate();
+        int nextGrudge = (memory.contains(nextGrudgeKey)) ? memory.getInt(nextGrudgeKey) + 1 : 1;
+        if (noDuration) {
+            memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), grudgeDelta);
+        } else {
+            memory.set(String.format("%s_%s", savedGrudgesKey, nextGrudge), grudgeDelta, durationInDays);
         }
+        memory.set(nextGrudgeKey, nextGrudge);
+        log.debug(String.format("Grudge %s: delta=%s", nextGrudge, grudgeDelta));
     }
 
     // this will be a non-positive number
     public float addRepFromGrudges(Object object) {
         float totalDelta = 0;
-        if (object instanceof HasMemory) {
-            HasMemory objectWithMemory = (HasMemory) object;
-            MemoryAPI memory = objectWithMemory.getMemoryWithoutUpdate();
-            if (memory.contains(nextGrudgeKey)) {
-                int latestGrudge = memory.getInt(nextGrudgeKey);
-                for (int i = latestGrudge; i > 0; i--) {
-                    if (!memory.contains(String.format("%s_%s", savedGrudgesKey, i))) break;
-                    totalDelta += memory.getFloat(String.format("%s_%s", savedGrudgesKey, i));
-                }
-            }
+        if (!(object instanceof HasMemory)) return totalDelta;
+
+        HasMemory objectWithMemory = (HasMemory) object;
+        MemoryAPI memory = objectWithMemory.getMemoryWithoutUpdate();
+        if (!memory.contains(nextGrudgeKey)) return totalDelta;
+
+        int latestGrudge = memory.getInt(nextGrudgeKey);
+        for (int i = latestGrudge; i > 0; i--) {
+            if (!memory.contains(String.format("%s_%s", savedGrudgesKey, i))) break;
+            totalDelta += memory.getFloat(String.format("%s_%s", savedGrudgesKey, i));
         }
+
         log.debug(String.format("Total delta from grudges: %s", totalDelta));
         return totalDelta;
     }

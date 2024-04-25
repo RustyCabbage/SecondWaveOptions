@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,11 +22,11 @@ public class BlindSightCombatPlugin extends BaseEveryFrameCombatPlugin {
     public Logger log = Global.getLogger(this.getClass());
     private CombatEngineAPI engine;
     private final Color TRANSPARENT_COLOR = new Color(0, 0, 0, 0);
+    private ArrayList<String> blindedShipIds;
 
     public void init(CombatEngineAPI engine) {
         // log.debug("Enabling BlindSight");
-        if (true) this.engine = engine;
-        else this.engine = null;
+        this.engine = engine;
     }
 
     @Override
@@ -36,20 +37,13 @@ public class BlindSightCombatPlugin extends BaseEveryFrameCombatPlugin {
             return;
         }
 
-        /*
-        if (engine.isEnemyInFullRetreat()) {
-            for (ShipAPI ship : engine.getShips()) {
-                ship.getMutableStats().getSightRadiusMod().unmodify(sourceId);
-            }
-            return;
-        }
-        /* */
-
         // reduce all ship sensor strength
         for (ShipAPI ship : engine.getShips()) {
+            if (blindedShipIds.contains(ship.getId())) continue;
             float sensorStrength = ship.getMutableStats().getSensorStrength().getModifiedValue();
             ship.getMutableStats().getSightRadiusMod().modifyMult(sourceId
                     , Math.max(0.25f, 0.25f + 0.075f * (sensorStrength - 30f) / 30f)); //todo configurable?
+            blindedShipIds.add(ship.getId());
         }
 
         // reveal firing ships and projectiles
